@@ -71,8 +71,9 @@ function WsController(): JSX.Element {
     }),
     shallow
   )
-
-  useWebSocket(`ws://${config.host}/ws`, {
+  const protocol = config.protocol === 'https' ? 'wss' : config.protocol === 'http' ? 'ws' : undefined
+  if (!protocol) throw new Error('Missing websocket protocol')
+  useWebSocket(`${protocol}://${config.host}/ws`, {
     onMessage: (ev) => {
       const msg = JSON.parse(ev.data)
       if (Message.isStatus(msg)) {
