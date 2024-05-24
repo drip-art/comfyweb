@@ -10,13 +10,15 @@ import { Message } from '../types'
 import { ControlPanelContainer, ImageViewContainer, NodeContainer } from '../containers'
 import config from '../config'
 import DIE from '@snomiao/die'
+import BackendSwitcher from './BackendSwitcher'
 
 const nodeTypes = { [NODE_IDENTIFIER]: NodeContainer }
 
 export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <FlowContainer/>
+      <BackendSwitcher />
+      <FlowContainer />
       <WsController />
     </div>
   )
