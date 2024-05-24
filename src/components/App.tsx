@@ -4,20 +4,19 @@ import { shallow } from 'zustand/shallow'
 import { useAppStore } from '../store'
 import { NODE_IDENTIFIER } from './NodeComponent'
 
-import 'reactflow/dist/style.css'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
-import { Message } from '../types'
+import 'reactflow/dist/style.css'
+import { getBackendUrl } from '../config'
 import { ControlPanelContainer, ImageViewContainer, NodeContainer } from '../containers'
-import config from '../config'
-import DIE from '@snomiao/die'
-import BackendSwitcher from './BackendSwitcher'
+import { Message } from '../types'
+import SettingsPanelButton from './SettingsPanelButton'
 
 const nodeTypes = { [NODE_IDENTIFIER]: NodeContainer }
 
 export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <BackendSwitcher />
+      <SettingsPanelButton />
       <FlowContainer />
       <WsController />
     </div>
@@ -74,9 +73,7 @@ function WsController() {
     }),
     shallow
   )
-  const protocol = config.protocol === 'https:' ? 'wss' : config.protocol === 'http:' ? 'ws' : undefined
-  if (!protocol) DIE(`Missing websocket protocol: ${protocol}`)
-  useWebSocket(`${protocol}://${config.host}/ws`, {
+  useWebSocket(getBackendUrl('/ws').replace(/^http/, 'ws'), {
     onMessage: (ev) => {
       const msg = JSON.parse(ev.data)
       if (Message.isStatus(msg)) {
