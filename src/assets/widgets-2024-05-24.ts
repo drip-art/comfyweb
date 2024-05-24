@@ -1,4 +1,4 @@
-{
+export const Widgets20240524 =  {
     "KSampler": {
         "input": {
             "required": {
@@ -8136,4 +8136,4 @@
         "category": "api/image",
         "output_node": true
     }
-}
+} as const
