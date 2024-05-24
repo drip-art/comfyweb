@@ -1,8 +1,9 @@
-import { type Connection, type NodeId, type SDNode } from './types'
+import { type Connection, type NodeId, type SDNodeLegacy } from './types'
 import defaultWorkflow from './assets/defaultWorkflow.json'
+import { WorkflowSchema } from './assets/workflow.schema'
 
 export interface PersistedNode {
-  value: SDNode
+  value: SDNodeLegacy
   position: { x: number; y: number }
 }
 
@@ -24,7 +25,7 @@ export function saveLocalWorkflow(graph: PersistedGraph): void {
 
 export function readWorkflowFromFile(
   ev: React.ChangeEvent<HTMLInputElement>,
-  cb: (workflow: PersistedGraph) => void
+  cb: (workflow: PersistedGraph | WorkflowSchema) => void
 ): void {
   const reader = new FileReader()
   if (ev.target.files !== null) {
@@ -37,9 +38,9 @@ export function readWorkflowFromFile(
   }
 }
 
-export function writeWorkflowToFile(workflow: PersistedGraph): void {
+export function writeJsonToFile(workflow: any, filename = 'workflow.json'): void {
   const a = document.createElement('a')
-  a.download = 'workflow.json'
+  a.download = filename
   a.href = URL.createObjectURL(new Blob([JSON.stringify(workflow)], { type: 'application/json' }))
   a.click()
 }

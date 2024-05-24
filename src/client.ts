@@ -1,6 +1,6 @@
 import { getBackendUrl } from './config'
 import { type PersistedNode, type PersistedGraph } from './persistence'
-import { Input, type NodeId, type PropertyKey, type Widget, type WidgetKey } from './types'
+import { Input, type NodeId, type PropertyKey, type WidgetLegacy, type WidgetKey } from './types'
 
 interface PromptRequest {
   client_id?: string
@@ -35,7 +35,7 @@ interface HistoryItem {
   outputs: Record<NodeId, Record<PropertyKey, any>>
 }
 
-export async function getWidgetLibrary(): Promise<Record<string, Widget>> {
+export async function getWidgetLibrary(): Promise<Record<string, WidgetLegacy>> {
   return await fetch(getBackendUrl('/object_info')).then(async (r) => await r.json())
 }
 
@@ -63,7 +63,7 @@ export async function sendPrompt(prompt: PromptRequest): Promise<PromptResponse>
   return { error }
 }
 
-export function createPrompt(graph: PersistedGraph, widgets: Record<string, Widget>, clientId?: string): PromptRequest {
+export function createPrompt(graph: PersistedGraph, widgets: Record<string, WidgetLegacy>, clientId?: string): PromptRequest {
   const prompt: Record<NodeId, Node> = {}
   const data: Record<NodeId, PersistedNode> = {}
 

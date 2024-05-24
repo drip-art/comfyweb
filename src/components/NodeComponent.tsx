@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { type NodeProps, Position, type HandleType, Handle } from 'reactflow'
-import { type Widget, Input, type NodeId } from '../types'
+import { type WidgetLegacy, Input, type NodeId } from '../types'
 import { TrashIcon, DocumentDuplicateIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline'
 import './NodeComponent.css'
 import { InputContainer } from '../containers'
@@ -14,7 +14,7 @@ interface ImagePreview {
 }
 
 interface Props {
-  node: NodeProps<Widget>
+  node: NodeProps<WidgetLegacy>
   progressBar?: number
   imagePreviews?: ImagePreview[]
   onPreviewImage: (idx: number) => void

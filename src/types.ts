@@ -1,20 +1,25 @@
+import { WidgetsSchema } from './assets/widget.schema'
+import { WorkflowSchema } from './assets/workflow.schema'
+
 export type WidgetKey = string
 export type PropertyKey = string
 export type NodeId = string
 
-export interface SDNode {
+export interface SDNodeLegacy {
   widget: WidgetKey
   fields: Record<PropertyKey, any>
   images?: string[]
 }
+export type Widget = WidgetsSchema[keyof WidgetsSchema]
+export type SDNode = WorkflowSchema['nodes'][number]
 
 export const SDNode = {
-  fromWidget(widget: Widget): SDNode {
+  fromWidget(widget: WidgetLegacy): SDNodeLegacy {
     return { widget: widget.name, fields: Widget.getDefaultFields(widget) }
   },
 }
 
-export interface Widget {
+export interface WidgetLegacy {
   name: WidgetKey
   input: { required: Record<PropertyKey, Input> }
   output: Flow[]
@@ -22,7 +27,7 @@ export interface Widget {
 }
 
 export const Widget = {
-  getDefaultFields(widget: Widget): Record<PropertyKey, any> {
+  getDefaultFields(widget: WidgetLegacy): Record<PropertyKey, any> {
     const fields: Record<PropertyKey, any> = {}
     for (const [key, input] of Object.entries(widget.input.required)) {
       if (Input.isBool(input)) {

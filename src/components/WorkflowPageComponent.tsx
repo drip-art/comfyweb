@@ -1,8 +1,9 @@
 import { memo } from 'react'
 import { type PersistedGraph, readWorkflowFromFile } from '../persistence'
+import { WorkflowSchema } from '../assets/workflow.schema'
 
 interface Props {
-  onLoadWorkflow: (persisted: PersistedGraph) => void
+  onLoadWorkflow: (persisted: PersistedGraph | WorkflowSchema) => void
   onSaveWorkflow: () => void
 }
 

@@ -9,9 +9,9 @@ import NodePickerComponent from './components/NodePickerComponent'
 import QueueComponent from './components/QueueComponent'
 import WorkflowPageComponent from './components/WorkflowPageComponent'
 import { useAppStore } from './store'
-import { type Input, type NodeId, type Widget } from './types'
+import { type Input, type NodeId, type WidgetLegacy } from './types'
 
-export function NodeContainer(props: NodeProps<Widget>): JSX.Element {
+export function NodeContainer(props: NodeProps<WidgetLegacy>): JSX.Element {
   const { progressBar, imagePreviews, onPreviewImage, onDuplicateNode, onDeleteNode } = useAppStore(
     (st) => ({
       progressBar: st.nodeInProgress?.id === props.id ? st.nodeInProgress.progress : undefined,
@@ -69,7 +69,7 @@ export function QueueContainer(): JSX.Element {
 }
 
 export function NodePickerContainer(): JSX.Element {
-  const { widgets, onAddNode } = useAppStore((st) => ({ widgets: st.widgets, onAddNode: st.onAddNode }), shallow)
+  const { widgets, onAddNode } = useAppStore((st) => ({ widgets: st.widgetsLegacy, onAddNode: st.onAddNode }), shallow)
   return <NodePickerComponent widgets={widgets} onAddNode={onAddNode} />
 }
 

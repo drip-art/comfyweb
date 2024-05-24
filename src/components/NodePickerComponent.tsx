@@ -1,14 +1,14 @@
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { memo } from 'react'
-import { type SDNode, type Widget, type WidgetKey } from '../types'
+import { type SDNodeLegacy, type WidgetLegacy, type WidgetKey } from '../types'
 
 interface Props {
-  widgets: Record<WidgetKey, Widget>
-  onAddNode: (widget: Widget, node?: SDNode, pos?: { x: number; y: number }, key?: number) => void
+  widgets: Record<WidgetKey, WidgetLegacy>
+  onAddNode: (widget: WidgetLegacy, node?: SDNodeLegacy, pos?: { x: number; y: number }, key?: number) => void
 }
 
 function NodePickerComponent({ widgets, onAddNode }: Props): JSX.Element {
-  const byCategory: Record<string, Widget[]> = {}
+  const byCategory: Record<string, WidgetLegacy[]> = {}
   for (const widget of Object.values(widgets)) {
     if (byCategory[widget.category] !== undefined) {
       byCategory[widget.category].push(widget)
