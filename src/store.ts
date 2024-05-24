@@ -42,9 +42,10 @@ export type OnPropChange = (node: NodeId, property: PropertyKey, value: any) => 
 export interface AppState {
   counter: number
   clientId?: string
-  widgets: Record<WidgetKey, Widget> 
-  widgetsLegacy: Record<WidgetKey, WidgetLegacy> 
-  graph: Record<NodeId, SDNodeLegacy >
+  widgets: Record<WidgetKey, Widget>
+  /** @deprecated use .widgets*/
+  widgetsLegacy: Record<WidgetKey, WidgetLegacy>
+  graph: Record<NodeId, SDNodeLegacy>
   nodes: Node[]
   edges: Edge[]
   nodeInProgress?: NodeInProgress
@@ -170,9 +171,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((st) => {
       let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graph: {} }
       const nodes = workflow.nodes
-      nodes.map(node=>{
-        const widget = state.widgetsLegacy[node.type]
-        const values =  node.widgets_values
+      nodes.map((node) => {
+        const widget = state.widgets[node.type]
+        const values = node.widgets_values
       })
       // for (const [key, node] of Object.entries(nodes)) {
       //   const widget = state.widgets[node.value.widget]
@@ -185,7 +186,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       // for (const connection of workflow.connections) {
       //   state = AppState.addConnection(state, connection)
       // }
-      
+
       // return state
       alert('TODO')
       return st
@@ -285,7 +286,8 @@ export const AppState = {
     return {
       ...state,
       nodes: applyNodeChanges([{ type: 'add', item }], state.nodes),
-      graph: { ...state.graph, [id]: node },
+      // TODO: fix node type
+      // graph: { ...state.graph, [id]: node },
       counter: nextKey,
     }
   },
