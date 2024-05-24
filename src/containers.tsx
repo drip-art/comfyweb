@@ -68,7 +68,10 @@ export function QueueContainer(): JSX.Element {
 }
 
 export function NodePickerContainer(): JSX.Element {
-  const { widgets, onAddNode } = useAppStore((st) => ({ widgets: st.widgetsLegacy, onAddNode: st.onAddNodeLegacy }), shallow)
+  const { widgets, onAddNode } = useAppStore(
+    (st) => ({ widgets: st.widgetsLegacy, onAddNode: st.onAddNodeLegacy }),
+    shallow
+  )
   return <NodePickerComponent widgets={widgets} onAddNode={onAddNode} />
 }
 
@@ -86,7 +89,7 @@ export function ImageViewContainer(): JSX.Element {
   const { image, onHideImagePreview, onPreviewImageNavigate } = useAppStore(
     (st) => ({
       image: st.previewedImageIndex !== undefined ? st.gallery[st.previewedImageIndex]?.image : undefined,
-      onHideImagePreview: st.onHideImagePreview,                            
+      onHideImagePreview: st.onHideImagePreview,
       onPreviewImageNavigate: st.onPreviewImageNavigate,
     }),
     shallow

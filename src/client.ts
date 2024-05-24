@@ -63,7 +63,11 @@ export async function sendPrompt(prompt: PromptRequest): Promise<PromptResponse>
   return { error }
 }
 
-export function createPrompt(graph: PersistedGraphLegacy, widgets: Record<string, WidgetLegacy>, clientId?: string): PromptRequest {
+export function createPrompt(
+  graph: PersistedGraphLegacy,
+  widgets: Record<string, WidgetLegacy>,
+  clientId?: string
+): PromptRequest {
   const prompt: Record<NodeId, Node> = {}
   const data: Record<NodeId, PersistedNodeLegacy> = {}
 

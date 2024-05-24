@@ -14,10 +14,7 @@ function WorkflowPageComponent({ onLoadWorkflow, onSaveWorkflow }: Props): JSX.E
         Load workflow
         <input type="file" className="hidden" onChange={(ev) => readWorkflowFromFile(ev, onLoadWorkflow)}></input>
       </label>
-      <div
-        className="p-2 my-4 cursor-pointer bg-stone-800 hover:bg-stone-700 rounded-md"
-        onClick={onSaveWorkflow}
-      >
+      <div className="p-2 my-4 cursor-pointer bg-stone-800 hover:bg-stone-700 rounded-md" onClick={onSaveWorkflow}>
         Save workflow
       </div>
     </div>
