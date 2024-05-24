@@ -34,7 +34,7 @@ function ImageViewComponent({ image, onHideImagePreview, onPreviewImageNavigate 
       <div className="flex w-full h-full">
         <img
           className="max-w-full max-h-full m-auto"
-          src={image !== undefined ? getBackendUrl(`/view/${image}`) : undefined}
+          src={image !== undefined ? getBackendUrl(`/view?${new URLSearchParams(image)}`) : undefined}
         ></img>
         <XMarkIcon
           className="absolute top-1 right-1 h-8 w-8 text-red-500 cursor-pointer"

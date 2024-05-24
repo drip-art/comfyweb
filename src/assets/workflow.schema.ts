@@ -1,7 +1,7 @@
 // import { WorkflowData } from "../workflowSchema";
 import WF20240523 from './workflow-2024-05-23.json'
 import WFDefault from './defaultWorkflow.json'
-
+import WFLegacy from './defaultWorkflowLegacy.json'
 // export type WorkflowNode = {
 //   // TODO
 // }
@@ -18,4 +18,4 @@ import WFDefault from './defaultWorkflow.json'
 //   version?: number
 // }
 export type WorkflowSchema = typeof WF20240523 & typeof WFDefault
-export { WF20240523, WFDefault }
+export { WF20240523, WFDefault, WFLegacy }

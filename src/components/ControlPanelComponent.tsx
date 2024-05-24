@@ -25,7 +25,7 @@ function ControlPanelComponent({ onSubmit, promptError }: Props): JSX.Element {
   return (
     <>
       {promptError !== undefined ? (
-        <div className="error-popup p-1 text-sm rounded-md bg-stone-900 border-2 border-stone-400 text-red-500">
+        <div className="error-popup p-1 text-sm rounded-md bg-stone-900 border-2 border-stone-400 text-red-500 -translate-y-10">
           {promptError}
         </div>
       ) : (

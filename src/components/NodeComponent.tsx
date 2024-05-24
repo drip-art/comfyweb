@@ -71,7 +71,6 @@ function NodeComponent({
           <></>
         )}
       </div>
-
       <div className="px-2 py-2 flex space-x-2 justify-between">
         <div className="flex flex-col grow-0 py-1">
           {inputs.map((k) => (
@@ -91,15 +90,18 @@ function NodeComponent({
       </div>
       <div className="m-auto flex flex-wrap max-w-xs mb-2">
         {imagePreviews
-          ?.map(({ image, index }) => (
-            <div className="flex grow basis-1/2" key={image}>
-              <img
-                className="w-full rounded-xl drop-shadow-md p-1"
-                src={getBackendUrl(`/view/${image}`)}
-                onClick={() => onPreviewImage(index)}
-              />
-            </div>
-          ))
+          ?.map(({ image, index }) => {
+            console.log(image)
+            return (
+              <div className="flex grow basis-1/2" key={image}>
+                <img
+                  className="w-full rounded-xl drop-shadow-md p-1"
+                  src={getBackendUrl(`/view?${new URLSearchParams(image)}`)}
+                  onClick={() => onPreviewImage(index)}
+                />
+              </div>
+            )
+          })
           .reverse()}
       </div>
     </div>

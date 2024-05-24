@@ -10,15 +10,28 @@ import { getBackendUrl } from '../config'
 import { ControlPanelContainer, ImageViewContainer, NodeContainer } from '../containers'
 import { Message } from '../types'
 import SettingsPanelButton from './SettingsPanelButton'
+import { WF20240523, WFDefault, WFLegacy } from '../assets/workflow.schema'
+import { useEffect } from 'react'
 
 const nodeTypes = { [NODE_IDENTIFIER]: NodeContainer }
 
 export default function App() {
+  useEffect(() => {
+    if (!useAppStore.getState().nodes.length) {
+      // load default workflows
+      // useAppStore.getState().onLoadWorkflowNew(WF20240523)
+      // useAppStore.getState().onLoadWorkflowLegacy(WFLegacy)
+    }
+  }, [])
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <SettingsPanelButton />
       <FlowContainer />
       <WsController />
+      <div className="right-0 top-0 absolute overflow-visible">
+        <div className="p-4">
+          <SettingsPanelButton />
+        </div>
+      </div>
     </div>
   )
 }
@@ -47,8 +60,8 @@ function FlowContainer() {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
-      onInit={() => {
-        void onInit()
+      onInit={(reactFlowInstance) => {
+        onInit()
       }}
     >
       <Background variant={BackgroundVariant.Dots} />
@@ -93,6 +106,7 @@ function WsController() {
         }
       } else if (Message.isExecuted(msg)) {
         const images = msg.data.output.images
+        console.log({ images })
         if (Array.isArray(images)) {
           onImageSave(msg.data.node, images)
         }

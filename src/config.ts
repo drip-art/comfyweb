@@ -1,34 +1,39 @@
 import DIE from '@snomiao/die'
 
+const isHot = !!(import.meta as any).hot
+const DEFAULT_BACKEND_BASE_URL = 'http://localhost:8188'
+
+export const sameOriginBaseUrl = `${window.location.protocol}//${window.location.host}`
 const defaultConfig = {
-  host: window.location.host,
-  protocol: window.location.protocol,
+  baseUrl: isHot ? DEFAULT_BACKEND_BASE_URL : sameOriginBaseUrl,
 }
 
-const hotReloadConfig = {
-  host: 'localhost:8188',
-  protocol: 'http:',
-}
+export type Config = typeof defaultConfig
 
-const config =
-  (await (async () => localStorage.getItem('comfyweb-config'))()
-    .then((e) => JSON.parse(String(e)))
-    .catch(() => null)) || (window.location.port === '5173' ? hotReloadConfig : defaultConfig)
+declare global {
+  var comfywebConfig: Config
+}
 
 // js listen to alt+b
-globalThis.document?.addEventListener('keydown', function (event) {
-  if (event.altKey && event.code === 'KeyB') {
-    const i = prompt('Input your backend url', getBackendUrl('')) ?? alert('Abort') ?? DIE('Abort')
-    const url = new URL(i)
-    config.host = url.host
-    config.protocol = url.protocol
-    localStorage.setItem('comfyweb-config', JSON.stringify(config))
-    alert('New Backend URL:' + getBackendUrl(''))
-  }
-})
+// globalThis.document?.addEventListener('keydown', function (event) {
+//   if (event.altKey && event.code === 'KeyB') {
+//     const i = prompt('Input your backend url', getBackendUrl('')) ?? alert('Abort') ?? DIE('Abort')
+//     config.baseUrl = new URL(i).href
+//     localStorage.setItem('comfyweb-config', JSON.stringify(config))
+//     alert('New Backend URL:' + getBackendUrl(''))
+//   }
+// })
+
+const config: Config =
+  (await (async () => localStorage.getItem('comfyweb-config'))()
+    .then((e) => JSON.parse(String(e)))
+    .catch(() => null)) ?? defaultConfig
+globalThis.comfywebConfig = config
+console.log(config)
 
 export function getBackendUrl(endpoint: string): string {
-  return `${config.protocol}//${config.host}${endpoint}`
+  const config = globalThis.comfywebConfig
+  return `${config.baseUrl}${endpoint}`
 }
 
 export default config

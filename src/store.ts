@@ -1,51 +1,55 @@
-import { create } from 'zustand'
+import exifr from 'exifr'
 import {
-  type Edge,
-  type Node,
   addEdge,
-  type OnNodesChange,
-  type OnEdgesChange,
-  type OnConnect,
-  applyNodeChanges,
   applyEdgeChanges,
-  type XYPosition,
+  applyNodeChanges,
+  type Edge,
   type Connection as FlowConnecton,
+  type Node,
+  type OnConnect,
+  type OnEdgesChange,
+  type OnNodesChange,
+  type XYPosition,
 } from 'reactflow'
+import { create } from 'zustand'
+import { WorkflowSchema } from './assets/workflow.schema'
 import { createPrompt, deleteFromQueue, getQueue, getWidgetLibrary as getWidgets, sendPrompt } from './client'
+import { NODE_IDENTIFIER } from './components/NodeComponent'
+import { getBackendUrl } from './config'
 import {
-  type GalleryItem,
-  type QueueItem,
-  type Connection,
-  type NodeId,
-  type NodeInProgress,
-  type PropertyKey,
-  SDNodeLegacy,
-  type WidgetLegacy as WidgetLegacy,
-  type WidgetKey,
-  Widget as Widget,
-  SDNode,
-} from './types'
-import {
+  PersistedNode,
   retrieveLocalWorkflow,
   saveLocalWorkflow,
   writeJsonToFile,
-  type PersistedGraph,
-  type PersistedNode,
+  type PersistedGraphLegacy,
+  type PersistedNodeLegacy,
 } from './persistence'
-import { NODE_IDENTIFIER } from './components/NodeComponent'
-import { getBackendUrl } from './config'
-import exifr from 'exifr'
-import { WorkflowSchema } from './assets/workflow.schema'
+import {
+  SDNode,
+  SDNodeLegacy,
+  Widget,
+  type Connection,
+  type GalleryItem,
+  type NodeId,
+  type NodeInProgress,
+  type PropertyKey,
+  type QueueItem,
+  type WidgetKey,
+  type WidgetLegacy,
+} from './types'
+import DIE from '@snomiao/die'
 
 export type OnPropChange = (node: NodeId, property: PropertyKey, value: any) => void
 
 export interface AppState {
   counter: number
   clientId?: string
-  widgets: Record<WidgetKey, Widget>
-  /** @deprecated use .widgets*/
+  /** @deprecated legacy*/
   widgetsLegacy: Record<WidgetKey, WidgetLegacy>
-  graph: Record<NodeId, SDNodeLegacy>
+  widgets: Record<WidgetKey, Widget>
+  /** @deprecated legacy*/
+  graphLegacy: Record<NodeId, SDNodeLegacy>
+  graph: Record<NodeId, SDNode>
   nodes: Node[]
   edges: Edge[]
   nodeInProgress?: NodeInProgress
@@ -57,16 +61,18 @@ export interface AppState {
   onEdgesChange: OnEdgesChange
   onConnect: OnConnect
   onPropChange: OnPropChange
-  onAddNode: (widget: WidgetLegacy, node?: SDNodeLegacy, pos?: XYPosition, key?: number) => void
+  /** @deprecated legacy*/
+  onAddNodeLegacy: (widget: WidgetLegacy, node?: SDNodeLegacy, pos?: XYPosition, key?: number) => void
+  onAddNode: (widget: Widget, node?: SDNode, pos?: XYPosition, key?: number) => void
   onDeleteNode: (id: NodeId) => void
   onDuplicateNode: (id: NodeId) => void
   onSubmit: () => Promise<void>
   onDeleteFromQueue: (id: number) => Promise<void>
   onInit: () => Promise<void>
-  onLoadWorkflow: (persisted: PersistedGraph | WorkflowSchema) => void
+  onLoadWorkflowLegacy: (persisted: PersistedGraphLegacy) => void
+  onSaveWorkflowLegacy: () => void
+  onLoadWorkflow: (persisted: PersistedGraphLegacy | WorkflowSchema) => void
   onSaveWorkflow: () => void
-  onLoadWorkflowNew: (persisted: WorkflowSchema) => void
-  onSaveWorkflowNew: () => void
   onPersistLocal: () => void
   onNewClientId: (id: string) => void
   onQueueUpdate: () => Promise<void>
@@ -83,6 +89,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   widgets: {},
   widgetsLegacy: {},
   graph: {},
+  graphLegacy: {},
   nodes: [],
   edges: [],
   queue: [],
@@ -98,12 +105,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   onPropChange: (id, key, val) => {
     set((state) => ({
-      graph: {
-        ...state.graph,
+      graphLegacy: {
+        ...state.graphLegacy,
         [id]: {
-          ...state.graph[id],
+          ...state.graphLegacy[id],
           fields: {
-            ...state.graph[id]?.fields,
+            ...state.graphLegacy[id]?.fields,
             [key]: val,
           },
         },
@@ -111,29 +118,32 @@ export const useAppStore = create<AppState>((set, get) => ({
     }))
   },
   onPersistLocal: () => {
-    saveLocalWorkflow(AppState.toPersisted(get()))
+    saveLocalWorkflow(AppState.toPersistedLegacy(get()))
   },
   onAddNode: (widget, node, position, key) => {
     set((st) => AppState.addNode(st, widget, node, position, key))
   },
+  onAddNodeLegacy: (widget, node, position, key) => {
+    set((st) => AppState.addNodeLegacy(st, widget, node, position, key))
+  },
   onDeleteNode: (id) => {
-    set(({ graph: { [id]: toDelete, ...graph }, nodes }) => ({
+    set(({ graphLegacy: { [id]: toDelete, ...graph }, nodes }) => ({
       // graph, // should work but currently buggy
       nodes: applyNodeChanges([{ type: 'remove', id }], nodes),
     }))
   },
   onDuplicateNode: (id) => {
     set((st) => {
-      const item = st.graph[id]
+      const item = st.graphLegacy[id]
       const node = st.nodes.find((n) => n.id === id)
       const position = node?.position
       const moved = position !== undefined ? { ...position, y: position.y + 100 } : undefined
-      return AppState.addNode(st, st.widgetsLegacy[item.widget], item, moved)
+      return AppState.addNodeLegacy(st, st.widgetsLegacy[item.widget], item, moved)
     })
   },
   onSubmit: async () => {
     const state = get()
-    const graph = AppState.toPersisted(state)
+    const graph = AppState.toPersistedLegacy(state)
     const res = await sendPrompt(createPrompt(graph, state.widgetsLegacy, state.clientId))
     set({ promptError: res.error })
   },
@@ -146,17 +156,16 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     const widgets = await getWidgets()
     set({ widgetsLegacy: widgets })
+    set({ widgets: widgets })
     get().onLoadWorkflow(retrieveLocalWorkflow() ?? { data: {}, connections: [] })
   },
-  onLoadWorkflow: (_workflow) => {
-    if ((_workflow as any)['nodes']) return get().onLoadWorkflowNew(_workflow as WorkflowSchema)
-    const workflow = _workflow as PersistedGraph
+  onLoadWorkflowLegacy: (workflow) => {
     set((st) => {
-      let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graph: {} }
+      let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graphLegacy: {} }
       for (const [key, node] of Object.entries(workflow.data)) {
         const widget = state.widgetsLegacy[node.value.widget]
         if (widget !== undefined) {
-          state = AppState.addNode(state, widget, node.value, node.position, parseInt(key))
+          state = AppState.addNodeLegacy(state, widget, node.value, node.position, parseInt(key))
         } else {
           console.warn(`Unknown widget ${node.value.widget}`)
         }
@@ -167,13 +176,20 @@ export const useAppStore = create<AppState>((set, get) => ({
       return state
     }, true)
   },
-  onLoadWorkflowNew: (workflow) => {
+  onLoadWorkflow: (_workflow) => {
+    if ((_workflow as any)['data']) return get().onLoadWorkflowLegacy(_workflow as PersistedGraphLegacy)
+    const workflow = _workflow as WorkflowSchema
     set((st) => {
-      let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graph: {} }
+      let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graphLegacy: {} }
       const nodes = workflow.nodes
-      nodes.map((node) => {
+      nodes.map((node, index) => {
         const widget = state.widgets[node.type]
         const values = node.widgets_values
+        if (widget !== undefined) {
+          // state = AppState.addNodeNew(state, widget, node.value, { x: node.pos[0], y: node.pos[1] }, index)
+        } else {
+          console.warn(`Unknown widget ${node.type}`)
+        }
       })
       // for (const [key, node] of Object.entries(nodes)) {
       //   const widget = state.widgets[node.value.widget]
@@ -188,16 +204,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       // }
 
       // return state
-      alert('TODO')
+      alert('TODO: load workflow new')
       return st
     }, true)
   },
 
+  onSaveWorkflowLegacy: () => {
+    writeJsonToFile(AppState.toPersistedLegacy(get()))
+  },
   onSaveWorkflow: () => {
     writeJsonToFile(AppState.toPersisted(get()))
-  },
-  onSaveWorkflowNew: () => {
-    writeJsonToFile(AppState.toPersistedNew(get()))
   },
   onNewClientId: (id) => {
     set({ clientId: id })
@@ -211,9 +227,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   onImageSave: (id, images) => {
     set((st) => ({
       gallery: st.gallery.concat(images.map((image) => ({ image }))),
-      graph: {
-        ...st.graph,
-        [id]: { ...st.graph[id], images },
+      graphLegacy: {
+        ...st.graphLegacy,
+        [id]: { ...st.graphLegacy[id], images },
       },
     }))
   },
@@ -233,8 +249,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ previewedImageIndex: undefined })
   },
   onLoadImageWorkflow: (image) => {
-    void exifr.parse(getBackendUrl(`/view/${image}`)).then((res) => {
-      get().onLoadWorkflow(JSON.parse(res.workflow))
+    void exifr.parse(getBackendUrl(`/view?${new URLSearchParams(image)}`)).then((res) => {
+      get().onLoadWorkflowLegacy(JSON.parse(res.workflow))
     })
   },
 }))
@@ -247,9 +263,37 @@ export const AppState = {
         : []
     )
   },
-  addNode(state: AppState, widget: WidgetLegacy, node?: SDNodeLegacy, position?: XYPosition, key?: number): AppState {
+  addNodeLegacy(
+    state: AppState,
+    widget: WidgetLegacy,
+    node?: SDNodeLegacy,
+    position?: XYPosition,
+    key?: number
+  ): AppState {
     const nextKey = key !== undefined ? Math.max(key, state.counter + 1) : state.counter + 1
     const id = nextKey.toString()
+    const maxZ = state.nodes
+      .map((n) => n.zIndex ?? 0)
+      .concat([0])
+      .reduce((a, b) => Math.max(a, b))
+    const item = {
+      id,
+      data: widget,
+      position: position ?? { x: 0, y: 0 },
+      type: NODE_IDENTIFIER,
+      zIndex: maxZ + 1,
+    }
+    return {
+      ...state,
+      nodes: applyNodeChanges([{ type: 'add', item }], state.nodes),
+      graphLegacy: { ...state.graphLegacy, [id]: node ?? SDNodeLegacy.fromWidget(widget) },
+      counter: nextKey,
+    }
+  },
+  addNode(state: AppState, widget: Widget, node?: SDNode, position?: XYPosition, key?: number): AppState {
+    const nextKey = key !== undefined ? Math.max(key, state.counter + 1) : state.counter + 1
+
+    const id = node?.id?.toString() ?? nextKey.toString()
     const maxZ = state.nodes
       .map((n) => n.zIndex ?? 0)
       .concat([0])
@@ -268,36 +312,13 @@ export const AppState = {
       counter: nextKey,
     }
   },
-  addNodeNew(state: AppState, widget: Widget, node: SDNode, position?: XYPosition, key?: number): AppState {
-    const nextKey = key !== undefined ? Math.max(key, state.counter + 1) : state.counter + 1
-
-    const id = nextKey.toString()
-    const maxZ = state.nodes
-      .map((n) => n.zIndex ?? 0)
-      .concat([0])
-      .reduce((a, b) => Math.max(a, b))
-    const item = {
-      id,
-      data: widget,
-      position: position ?? { x: 0, y: 0 },
-      type: NODE_IDENTIFIER,
-      zIndex: maxZ + 1,
-    }
-    return {
-      ...state,
-      nodes: applyNodeChanges([{ type: 'add', item }], state.nodes),
-      // TODO: fix node type
-      // graph: { ...state.graph, [id]: node },
-      counter: nextKey,
-    }
-  },
   addConnection(state: AppState, connection: FlowConnecton): AppState {
     return { ...state, edges: addEdge(connection, state.edges) }
   },
-  toPersisted(state: AppState): PersistedGraph {
-    const data: Record<NodeId, PersistedNode> = {}
+  toPersistedLegacy(state: AppState): PersistedGraphLegacy {
+    const data: Record<NodeId, PersistedNodeLegacy> = {}
     for (const node of state.nodes) {
-      const value = state.graph[node.id]
+      const value = state.graphLegacy[node.id]
       if (value !== undefined) {
         data[node.id] = { value, position: node.position }
       }
@@ -308,16 +329,23 @@ export const AppState = {
       connections: AppState.getValidConnections(state),
     }
   },
-  toPersistedNew(state: AppState): WorkflowSchema {
-    // const data: Record<NodeId, PersistedNode> = {}
-    // for (const node of state.nodes) {
-    //   const value = state.graph[node.id]
-    //   if (value !== undefined) {
-    //     data[node.id] = { value, position: node.position }
-    //   }
-    // }
-
+  toPersisted(state: AppState): WorkflowSchema {
+    const nodes: Record<NodeId, PersistedNode> = {}
+    for (const node of state.nodes) {
+      const value = state.graph[node.id]
+      if (value !== undefined) {
+        nodes[node.id] = { value, position: node.position }
+      }
+    }
+    throw new Error('Not implemented')
     return {
+      // nodes,
+      // links,
+      // config,
+      // extra,
+      // groups,
+      // last_link_id,
+      // last_node_id,
       // data,
       // connections: AppState.getValidConnections(state),
     } as WorkflowSchema

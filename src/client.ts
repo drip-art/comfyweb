@@ -1,5 +1,5 @@
 import { getBackendUrl } from './config'
-import { type PersistedNode, type PersistedGraph } from './persistence'
+import { type PersistedNodeLegacy, type PersistedGraphLegacy } from './persistence'
 import { Input, type NodeId, type PropertyKey, type WidgetLegacy, type WidgetKey } from './types'
 
 interface PromptRequest {
@@ -63,9 +63,9 @@ export async function sendPrompt(prompt: PromptRequest): Promise<PromptResponse>
   return { error }
 }
 
-export function createPrompt(graph: PersistedGraph, widgets: Record<string, WidgetLegacy>, clientId?: string): PromptRequest {
+export function createPrompt(graph: PersistedGraphLegacy, widgets: Record<string, WidgetLegacy>, clientId?: string): PromptRequest {
   const prompt: Record<NodeId, Node> = {}
-  const data: Record<NodeId, PersistedNode> = {}
+  const data: Record<NodeId, PersistedNodeLegacy> = {}
 
   for (const [id, node] of Object.entries(graph.data)) {
     const fields = { ...node.value.fields }

@@ -10,12 +10,17 @@ export interface SDNodeLegacy {
   fields: Record<PropertyKey, any>
   images?: string[]
 }
-export type Widget = WidgetsSchema[keyof WidgetsSchema]
-export type SDNode = WorkflowSchema['nodes'][number]
+export type SDNode = Required<Pick<WorkflowSchema['nodes'][number], 'type' | 'widgets_values'>> &
+  Partial<WorkflowSchema['nodes'][number]>
 
-export const SDNode = {
+export const SDNodeLegacy = {
   fromWidget(widget: WidgetLegacy): SDNodeLegacy {
-    return { widget: widget.name, fields: Widget.getDefaultFields(widget) }
+    return { widget: widget.name, fields: WidgetLegacy.getDefaultFields(widget) }
+  },
+}
+export const SDNode = {
+  fromWidget(widget: Widget) {
+    return { type: widget.name, widgets_values: Widget.getDefaultValues(widget) } satisfies Partial<SDNode>
   },
 }
 
@@ -25,8 +30,9 @@ export interface WidgetLegacy {
   output: Flow[]
   category: string
 }
+export type Widget = WidgetLegacy
 
-export const Widget = {
+export const WidgetLegacy = {
   getDefaultFields(widget: WidgetLegacy): Record<PropertyKey, any> {
     const fields: Record<PropertyKey, any> = {}
     for (const [key, input] of Object.entries(widget.input.required)) {
@@ -43,6 +49,25 @@ export const Widget = {
       }
     }
     return fields
+  },
+}
+export const Widget = {
+  getDefaultValues(widget: Widget): any[] {
+    const fields: Record<PropertyKey, any> = {}
+    for (const [key, input] of Object.entries(widget.input.required)) {
+      if (Input.isBool(input)) {
+        fields[key] = input[1].default ?? false
+      } else if (Input.isFloat(input)) {
+        fields[key] = input[1].default ?? 0.0
+      } else if (Input.isInt(input)) {
+        fields[key] = input[1].default ?? 0
+      } else if (Input.isString(input)) {
+        fields[key] = ''
+      } else if (Input.isList(input)) {
+        fields[key] = input[0][0]
+      }
+    }
+    return Object.values(fields)
   },
 }
 
@@ -74,11 +99,14 @@ export interface InputType {
   STRING: [string, StringProps]
 }
 
-export type Flow = 'MODEL' | 'CONDITIONING' | 'CLIP' | 'IMAGE' | 'LATENT' | 'CONTROL_NET' | 'MASK'
+const FLOWS = ['MODEL', 'CONDITIONING', 'CLIP', 'IMAGE', 'LATENT', 'CONTROL_NET', 'MASK', 'WEBCAM'] as const
+export type Flow = (typeof FLOWS)[number]
 
 export type Parameter<K extends keyof InputType> = [K, InputType[K][1]]
 
 export type Input = Parameter<keyof InputType> | [string[]] | [Flow]
+/* HACK: make typescript happy before buildig correct widgets type */
+// | Record<never, never>[]
 
 export const Input = {
   isBool(i: Input): i is Parameter<'BOOL'> {
@@ -153,3 +181,4 @@ export interface QueueItem {
   prompts: string[]
   model?: string
 }
+export type ComfyImage = string | { filename: string; subfolder: string; type: 'output'; rand?: string }

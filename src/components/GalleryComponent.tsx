@@ -1,6 +1,6 @@
 import { memo, useState } from 'react'
 import { getBackendUrl } from '../config'
-import { type GalleryItem } from '../types'
+import { type ComfyImage, type GalleryItem } from '../types'
 
 interface Props {
   gallery: GalleryItem[]
@@ -34,7 +34,7 @@ function GalleryItem({
   onView,
   onLoadWorkflow,
 }: {
-  image: string
+  image: ComfyImage
   onView: () => void
   onLoadWorkflow: () => void
 }): JSX.Element {
@@ -47,7 +47,11 @@ function GalleryItem({
       onMouseLeave={() => setHovered(false)}
       onClick={onView}
     >
-      <img key={image} className="absolute p-1 rounded-xl drop-shadow-md" src={getBackendUrl(`/view/${image}`)} />
+      <img
+        key={JSON.stringify(image)}
+        className="absolute p-1 rounded-xl drop-shadow-md"
+        src={getBackendUrl(`/view?${new URLSearchParams(image)}`)}
+      />
       {isHovered ? (
         <div className="absolute w-full h-full flex flex-col items-center justify-center">
           <div className="p-1 m-1 bg-stone-800 hover:bg-stone-700 rounded-md" onClick={onView}>

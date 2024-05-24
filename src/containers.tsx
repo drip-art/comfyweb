@@ -15,7 +15,7 @@ export function NodeContainer(props: NodeProps<WidgetLegacy>): JSX.Element {
   const { progressBar, imagePreviews, onPreviewImage, onDuplicateNode, onDeleteNode } = useAppStore(
     (st) => ({
       progressBar: st.nodeInProgress?.id === props.id ? st.nodeInProgress.progress : undefined,
-      imagePreviews: st.graph[props.id]?.images?.flatMap((image) => {
+      imagePreviews: st.graphLegacy[props.id]?.images?.flatMap((image) => {
         const index = st.gallery.findIndex((i) => i.image === image)
         return index !== -1 ? { image, index } : []
       }),
@@ -48,11 +48,10 @@ export function ControlPanelContainer(): JSX.Element {
   )
   return <ControlPanelComponent promptError={promptError} onSubmit={onSubmit} />
 }
-
 export function WorkflowPageContainer(): JSX.Element {
   const { onLoadWorkflow, onSaveWorkflow } = useAppStore((st) => ({
     onLoadWorkflow: st.onLoadWorkflow,
-    onSaveWorkflow: st.onSaveWorkflow,
+    onSaveWorkflow: st.onSaveWorkflowLegacy,
   }))
   return <WorkflowPageComponent onLoadWorkflow={onLoadWorkflow} onSaveWorkflow={onSaveWorkflow} />
 }
@@ -69,7 +68,7 @@ export function QueueContainer(): JSX.Element {
 }
 
 export function NodePickerContainer(): JSX.Element {
-  const { widgets, onAddNode } = useAppStore((st) => ({ widgets: st.widgetsLegacy, onAddNode: st.onAddNode }), shallow)
+  const { widgets, onAddNode } = useAppStore((st) => ({ widgets: st.widgetsLegacy, onAddNode: st.onAddNodeLegacy }), shallow)
   return <NodePickerComponent widgets={widgets} onAddNode={onAddNode} />
 }
 
@@ -87,7 +86,7 @@ export function ImageViewContainer(): JSX.Element {
   const { image, onHideImagePreview, onPreviewImageNavigate } = useAppStore(
     (st) => ({
       image: st.previewedImageIndex !== undefined ? st.gallery[st.previewedImageIndex]?.image : undefined,
-      onHideImagePreview: st.onHideImagePreview,
+      onHideImagePreview: st.onHideImagePreview,                            
       onPreviewImageNavigate: st.onPreviewImageNavigate,
     }),
     shallow
@@ -110,7 +109,7 @@ interface InputContainerProps {
 export function InputContainer({ id, name, input }: InputContainerProps): JSX.Element {
   const { value, onPropChange } = useAppStore(
     (st) => ({
-      value: st.graph[id]?.fields[name],
+      value: st.graphLegacy[id]?.fields[name],
       onPropChange: st.onPropChange,
     }),
     shallow
