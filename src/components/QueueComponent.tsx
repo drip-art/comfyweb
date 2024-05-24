@@ -14,7 +14,7 @@ function QueueComponent({ queue, onDeleteFromQueue }: Props): JSX.Element {
     <div className="overflow-y-scroll w-full">
       {queue.map((it, i) => (
         <div className="p-1 flex bg-stone-800 odd:bg-stone-900 items-center" key={i}>
-          <span className='h-full'>{i + 1}.</span>
+          <span className="h-full">{i + 1}.</span>
           <div className="flex flex-wrap">
             <Label label="model" value={it.model === undefined ? 'N/A' : it.model} />
             {it.prompts.map((prompt, i) => (

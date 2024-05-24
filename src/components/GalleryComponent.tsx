@@ -20,7 +20,7 @@ function GalleryComponent({ gallery, onPreviewImage, onLoadImageWorkflow }: Prop
               key={JSON.stringify(image)}
               image={image}
               onView={() => onPreviewImage(i)}
-              onLoadWorkflow={() => onLoadImageWorkflow((image))}
+              onLoadWorkflow={() => onLoadImageWorkflow(image)}
             />
           ))
           .reverse()}
