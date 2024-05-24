@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { type NodeProps, Position, type HandleType, Handle } from 'reactflow'
-import { type WidgetLegacy, Input, type NodeId } from '../types'
+import { type WidgetLegacy, Input, type NodeId, ComfyImage } from '../types'
 import { TrashIcon, DocumentDuplicateIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline'
 import './NodeComponent.css'
 import { InputContainer } from '../containers'
@@ -9,7 +9,7 @@ import { getBackendUrl } from '../config'
 export const NODE_IDENTIFIER = 'sdNode'
 
 interface ImagePreview {
-  image: string
+  image: ComfyImage
   index: number
 }
 
@@ -93,7 +93,7 @@ function NodeComponent({
           ?.map(({ image, index }) => {
             console.log(image)
             return (
-              <div className="flex grow basis-1/2" key={image}>
+              <div className="flex grow basis-1/2" key={JSON.stringify(image)}>
                 <img
                   className="w-full rounded-xl drop-shadow-md p-1"
                   src={getBackendUrl(`/view?${new URLSearchParams(image)}`)}
@@ -122,7 +122,7 @@ function Slot({ id, label, type, position }: SlotProps): JSX.Element {
     <div className={position === Position.Right ? 'flex flex-row-reverse' : 'flex'}>
       <Handle id={id} type={type} position={position} className="w-3 h-3 !bg-teal-500 relative" />
       <h5 className="font-semibold text-xs" style={{ marginBottom: 2 }}>
-        {label.toUpperCase()}
+        {label}
       </h5>
     </div>
   )

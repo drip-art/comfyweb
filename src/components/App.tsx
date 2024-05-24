@@ -4,25 +4,17 @@ import { shallow } from 'zustand/shallow'
 import { useAppStore } from '../store'
 import { NODE_IDENTIFIER } from './NodeComponent'
 
+import { useEffect } from 'react'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 import 'reactflow/dist/style.css'
 import { getBackendUrl } from '../config'
 import { ControlPanelContainer, ImageViewContainer, NodeContainer } from '../containers'
 import { Message } from '../types'
 import SettingsPanelButton from './SettingsPanelButton'
-import { WF20240523, WFDefault, WFLegacy } from '../assets/workflow.schema'
-import { useEffect } from 'react'
 
 const nodeTypes = { [NODE_IDENTIFIER]: NodeContainer }
 
 export default function App() {
-  useEffect(() => {
-    if (!useAppStore.getState().nodes.length) {
-      // load default workflows
-      // useAppStore.getState().onLoadWorkflowNew(WF20240523)
-      // useAppStore.getState().onLoadWorkflowLegacy(WFLegacy)
-    }
-  }, [])
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <FlowContainer />

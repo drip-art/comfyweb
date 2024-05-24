@@ -5,7 +5,7 @@ import { type ComfyImage, type GalleryItem } from '../types'
 interface Props {
   gallery: GalleryItem[]
   onPreviewImage: (idx: number) => void
-  onLoadImageWorkflow: (image: string) => void
+  onLoadImageWorkflow: (image: ComfyImage) => void
 }
 
 function GalleryComponent({ gallery, onPreviewImage, onLoadImageWorkflow }: Props): JSX.Element {
@@ -17,10 +17,10 @@ function GalleryComponent({ gallery, onPreviewImage, onLoadImageWorkflow }: Prop
         {gallery
           .map(({ image }, i) => (
             <GalleryItem
-              key={image}
+              key={JSON.stringify(image)}
               image={image}
               onView={() => onPreviewImage(i)}
-              onLoadWorkflow={() => onLoadImageWorkflow(image)}
+              onLoadWorkflow={() => onLoadImageWorkflow((image))}
             />
           ))
           .reverse()}

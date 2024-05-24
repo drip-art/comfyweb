@@ -2,9 +2,10 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { memo, useEffect } from 'react'
 import ReactModal from 'react-modal'
 import { getBackendUrl } from '../config'
+import { ComfyImage } from '../types'
 
 interface Props {
-  image?: string
+  image?: ComfyImage
   onHideImagePreview: () => void
   onPreviewImageNavigate: (next: boolean) => void
 }
