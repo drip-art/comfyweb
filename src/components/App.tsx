@@ -7,7 +7,7 @@ import { ControlPanelContainer, ImageViewContainer, NodeContainer } from '../con
 import { useAppStore } from '../store'
 import { Message } from '../types'
 import { NODE_IDENTIFIER } from './NodeComponent'
-import SettingsPanelButton from './SettingsPanelButton'
+import SettingsPanel from './SettingsPanelButton'
 
 const nodeTypes = { [NODE_IDENTIFIER]: NodeContainer }
 
@@ -57,7 +57,7 @@ function FlowContainer() {
         <ImageViewContainer />
         <div className="right-0 top-0 absolute overflow-visible">
           <div className="p-3">
-            <SettingsPanelButton />
+            <SettingsPanel />
           </div>
         </div>
       </Panel>

@@ -33,6 +33,7 @@ export default function BackendSwitcher() {
         <datalist id="backends">
           <option>http://localhost:8188</option>
           <option>{sameOriginBaseUrl}</option>
+          {/* https://comfy-api.drip.art/ */}
         </datalist>
         <button>Submit</button>
       </div>

@@ -10,6 +10,7 @@ import QueueComponent from './components/QueueComponent'
 import WorkflowPageComponent from './components/WorkflowPageComponent'
 import { useAppStore } from './store'
 import { type Input, type NodeId, type WidgetLegacy } from './types'
+import BackendSwitcher from './components/BackendSwitcher'
 
 export function NodeContainer(props: NodeProps<WidgetLegacy>): JSX.Element {
   const { progressBar, imagePreviews, onPreviewImage, onDuplicateNode, onDeleteNode } = useAppStore(
@@ -74,6 +75,13 @@ export function QueueContainer(): JSX.Element {
     shallow
   )
   return <QueueComponent queue={queue} onDeleteFromQueue={onDeleteFromQueue} />
+}
+export function SettingsContainer() {
+  return (
+    <div className="w-full p-2">
+      <BackendSwitcher />
+    </div>
+  )
 }
 
 export function NodePickerContainer(): JSX.Element {

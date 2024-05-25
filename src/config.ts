@@ -1,13 +1,12 @@
 import DIE from '@snomiao/die'
 
-const isHot = !!(import.meta as any).hot
+const isHot = !!(import.meta as any).hot // vite develop
+const isProxied = import.meta.env?.BACKEND_URL // maybe https://api.drip.art/prompt
+const isVercel = import.meta.env?.VERCEL_URL // comfyweb.vercel.app
 const DEFAULT_BACKEND_BASE_URL = 'http://localhost:8188'
 
 export const sameOriginBaseUrl = `${window.location.protocol}//${window.location.host}`
-const defaultConfig = {
-  baseUrl: isHot ? DEFAULT_BACKEND_BASE_URL : sameOriginBaseUrl,
-}
-
+const defaultConfig = { baseUrl: DEFAULT_BACKEND_BASE_URL }
 export type Config = typeof defaultConfig
 
 declare global {

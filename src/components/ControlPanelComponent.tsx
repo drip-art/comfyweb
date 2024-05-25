@@ -1,8 +1,9 @@
 import { memo, useState } from 'react'
 import { ArrowsPointingInIcon } from '@heroicons/react/24/outline'
-import { GalleryContainer, NodePickerContainer, QueueContainer, WorkflowPageContainer } from '../containers'
+import { GalleryContainer, NodePickerContainer, QueueContainer, SettingsContainer, WorkflowPageContainer } from '../containers'
 
-type Tab = 'Queue' | 'Gallery' | 'Nodes' | 'Workflow'
+const TABS = ['Queue', 'Gallery', 'Nodes', 'Workflow', 'Settings'] as const
+type Tab = (typeof TABS)[number]
 
 interface PanelState {
   activeTab: Tab
@@ -14,11 +15,9 @@ interface Props {
   onSubmit: () => Promise<void>
 }
 
-const TABS: Tab[] = ['Queue', 'Gallery', 'Nodes', 'Workflow']
-
 function ControlPanelComponent({ onSubmit, promptError }: Props): JSX.Element {
   const [{ activeTab, minimized }, setState] = useState<PanelState>({
-    activeTab: 'Queue',
+    activeTab: 'Nodes',
     minimized: false,
   })
 
@@ -61,6 +60,8 @@ function ControlPanelComponent({ onSubmit, promptError }: Props): JSX.Element {
               <GalleryContainer />
             ) : activeTab === 'Nodes' ? (
               <NodePickerContainer />
+            ) : activeTab === 'Settings' ? (
+              <SettingsContainer />
             ) : (
               <WorkflowPageContainer />
             )}
@@ -74,7 +75,7 @@ function ControlPanelComponent({ onSubmit, promptError }: Props): JSX.Element {
 export default memo(ControlPanelComponent)
 
 interface PanelTabsProps<T> {
-  tabs: T[]
+  tabs: readonly T[]
   active: T
   onTabChange: (tab: T) => void
   children: JSX.Element[]
