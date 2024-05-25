@@ -49,6 +49,7 @@ export interface AppState {
   /** @deprecated legacy*/
   widgetsLegacy: Record<WidgetKey, WidgetLegacy>
   widgets: Record<WidgetKey, Widget>
+  widgetsCustom: Record<WidgetKey, Widget>
   /** @deprecated legacy*/
   graph: Record<NodeId, SDNodeLegacy>
   graphNew: Record<NodeId, SDNode>
@@ -90,6 +91,7 @@ export interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
   counter: 0,
   widgets: {},
+  widgetsCustom: {},
   widgetsLegacy: {},
   graphNew: {},
   graph: {},

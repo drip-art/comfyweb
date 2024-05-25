@@ -13,7 +13,7 @@ interface ImagePreview {
   index: number
 }
 
-interface Props {
+type Props = {
   node: NodeProps<WidgetLegacy>
   progressBar?: number
   imagePreviews?: ImagePreview[]
