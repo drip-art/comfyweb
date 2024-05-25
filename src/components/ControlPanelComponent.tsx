@@ -1,6 +1,12 @@
 import { memo, useState } from 'react'
 import { ArrowsPointingInIcon } from '@heroicons/react/24/outline'
-import { GalleryContainer, NodePickerContainer, QueueContainer, SettingsContainer, WorkflowPageContainer } from '../containers'
+import {
+  GalleryContainer,
+  NodePickerContainer,
+  QueueContainer,
+  SettingsContainer,
+  WorkflowPageContainer,
+} from '../containers'
 
 const TABS = ['Queue', 'Gallery', 'Nodes', 'Workflow', 'Settings'] as const
 type Tab = (typeof TABS)[number]
