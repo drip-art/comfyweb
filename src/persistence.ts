@@ -1,6 +1,7 @@
 import { SDNode, type Connection, type NodeId, type SDNodeLegacy } from './types'
-import defaultWorkflowLegacy from './assets/defaultWorkflowLegacy.json'
-import { WorkflowSchema } from './assets/workflow.schema'
+// import defaultWorkflowLegacy from './assets/defaultWorkflowLegacy.json'
+import { WF20240524, WorkflowSchema } from './assets/workflow.schema'
+import { defaultWorkflow } from './assets/defaultWorkflow'
 
 export interface PersistedNodeLegacy {
   value: SDNodeLegacy
@@ -22,9 +23,11 @@ export interface PersistedGraphLegacy {
 
 const GRAPH_KEY = 'graph'
 
-export function retrieveLocalWorkflow(): PersistedGraphLegacy | null {
+export function retrieveLocalWorkflow(): WorkflowSchema | PersistedGraphLegacy | null {
   const item = localStorage.getItem(GRAPH_KEY)
-  return item === null ? defaultWorkflowLegacy : JSON.parse(item)
+  return null
+  // return WF20240524
+  // return item === null ? WF20240524 : JSON.parse(item)
 }
 
 export function saveLocalWorkflow(graph: PersistedGraphLegacy): void {
@@ -41,6 +44,20 @@ export function readWorkflowFromFile(
     reader.addEventListener('load', (ev) => {
       if (ev.target?.result != null && typeof ev.target.result === 'string') {
         cb(JSON.parse(ev.target.result))
+      }
+    })
+  }
+}
+export function readImageWorkflowFromFile(
+  ev: React.ChangeEvent<HTMLInputElement>,
+  cb: (image: ArrayBuffer) => void
+): void {
+  const reader = new FileReader()
+  if (ev.target.files !== null) {
+    reader.readAsArrayBuffer(ev.target.files[0])
+    reader.addEventListener('load', (ev) => {
+      if (ev.target?.result != null && ev.target.result instanceof ArrayBuffer) {
+        cb(ev.target.result)
       }
     })
   }

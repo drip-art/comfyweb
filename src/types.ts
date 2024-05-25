@@ -8,13 +8,13 @@ export type NodeId = string
 export interface SDNodeLegacy {
   widget: WidgetKey
   fields: Record<PropertyKey, any>
-  images?: string[]
+  images?: ComfyImage[]
 }
 export type SDNode = Required<Pick<WorkflowSchema['nodes'][number], 'type' | 'widgets_values'>> &
   Partial<WorkflowSchema['nodes'][number]>
 
 export const SDNodeLegacy = {
-  fromWidget(widget: WidgetLegacy): SDNodeLegacy {
+  fromWidgetLegacy(widget: WidgetLegacy): SDNodeLegacy {
     return { widget: widget.name, fields: WidgetLegacy.getDefaultFields(widget) }
   },
 }
@@ -30,7 +30,7 @@ export interface WidgetLegacy {
   output: Flow[]
   category: string
 }
-export type Widget = WidgetLegacy
+export type Widget = WidgetLegacy & { display_name?: string; description?: string; output_node?: boolean }
 
 export const WidgetLegacy = {
   getDefaultFields(widget: WidgetLegacy): Record<PropertyKey, any> {
@@ -49,6 +49,23 @@ export const WidgetLegacy = {
       }
     }
     return fields
+  },
+  getDefaultFieldsEntries(widget: WidgetLegacy): [PropertyKey, any][] {
+    const entries: [PropertyKey, any][] = []
+    for (const [key, input] of Object.entries(widget.input.required)) {
+      if (Input.isBool(input)) {
+        entries.push([key, input[1].default ?? false])
+      } else if (Input.isFloat(input)) {
+        entries.push([key, input[1].default ?? 0.0])
+      } else if (Input.isInt(input)) {
+        entries.push([key, input[1].default ?? 0])
+      } else if (Input.isString(input)) {
+        entries.push([key, ''])
+      } else if (Input.isList(input)) {
+        entries.push([key, input[0][0]])
+      }
+    }
+    return entries
   },
 }
 export const Widget = {
@@ -114,6 +131,7 @@ export const Input = {
   },
 
   isInt(i: Input): i is Parameter<'INT'> {
+    console.log(i)
     return i[0] === 'INT'
   },
 
@@ -173,7 +191,7 @@ export interface Connection {
 
 export interface GalleryItem {
   prompt?: string
-  image: string
+  image: ComfyImage
 }
 
 export interface QueueItem {

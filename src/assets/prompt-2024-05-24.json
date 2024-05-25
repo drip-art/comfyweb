@@ -44,7 +44,7 @@
         },
         "6": {
             "inputs": {
-                "text": "beautiful scenery nature glass bottle landscape, , purple galax\n\ny bottle,",
+                "text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
                 "clip": [
                     "4",
                     1
@@ -226,7 +226,7 @@
                             "Node name for S&R": "CLIPTextEncode"
                         },
                         "widgets_values": [
-                            "beautiful scenery nature glass bottle landscape, , purple galax\n\ny bottle,"
+                            "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,"
                         ]
                     },
                     {

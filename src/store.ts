@@ -25,9 +25,11 @@ import {
   type PersistedNodeLegacy,
 } from './persistence'
 import {
+  ComfyImage,
   SDNode,
   SDNodeLegacy,
   Widget,
+  WidgetLegacy,
   type Connection,
   type GalleryItem,
   type NodeId,
@@ -35,9 +37,7 @@ import {
   type PropertyKey,
   type QueueItem,
   type WidgetKey,
-  type WidgetLegacy,
 } from './types'
-import DIE from '@snomiao/die'
 
 export type OnPropChange = (node: NodeId, property: PropertyKey, value: any) => void
 
@@ -48,8 +48,8 @@ export interface AppState {
   widgetsLegacy: Record<WidgetKey, WidgetLegacy>
   widgets: Record<WidgetKey, Widget>
   /** @deprecated legacy*/
-  graphLegacy: Record<NodeId, SDNodeLegacy>
-  graph: Record<NodeId, SDNode>
+  graph: Record<NodeId, SDNodeLegacy>
+  graphNew: Record<NodeId, SDNode>
   nodes: Node[]
   edges: Edge[]
   nodeInProgress?: NodeInProgress
@@ -81,15 +81,15 @@ export interface AppState {
   onPreviewImage: (id: number) => void
   onPreviewImageNavigate: (next: boolean) => void
   onHideImagePreview: () => void
-  onLoadImageWorkflow: (image: string) => void
+  onLoadImageWorkflow: (image: ComfyImage | ArrayBuffer) => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
   counter: 0,
   widgets: {},
   widgetsLegacy: {},
+  graphNew: {},
   graph: {},
-  graphLegacy: {},
   nodes: [],
   edges: [],
   queue: [],
@@ -105,12 +105,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   onPropChange: (id, key, val) => {
     set((state) => ({
-      graphLegacy: {
-        ...state.graphLegacy,
+      graph: {
+        ...state.graph,
         [id]: {
-          ...state.graphLegacy[id],
+          ...state.graph[id],
           fields: {
-            ...state.graphLegacy[id]?.fields,
+            ...state.graph[id]?.fields,
             [key]: val,
           },
         },
@@ -127,14 +127,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((st) => AppState.addNodeLegacy(st, widget, node, position, key))
   },
   onDeleteNode: (id) => {
-    set(({ graphLegacy: { [id]: toDelete, ...graph }, nodes }) => ({
+    set(({ graph: { [id]: toDelete, ...graph }, nodes }) => ({
       // graph, // should work but currently buggy
       nodes: applyNodeChanges([{ type: 'remove', id }], nodes),
     }))
   },
   onDuplicateNode: (id) => {
     set((st) => {
-      const item = st.graphLegacy[id]
+      const item = st.graph[id]
       const node = st.nodes.find((n) => n.id === id)
       const position = node?.position
       const moved = position !== undefined ? { ...position, y: position.y + 100 } : undefined
@@ -155,16 +155,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     setInterval(() => get().onPersistLocal(), 5000)
 
     const widgets = await getWidgets()
+    console.log({ widgets })
     set({ widgetsLegacy: widgets })
     set({ widgets: widgets })
+
     get().onLoadWorkflow(retrieveLocalWorkflow() ?? { data: {}, connections: [] })
   },
   onLoadWorkflowLegacy: (workflow) => {
+    console.info('Load workflow legacy', { workflow })
     set((st) => {
-      let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graphLegacy: {} }
+      let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graph: {}, graphNew: {} }
       for (const [key, node] of Object.entries(workflow.data)) {
         const widget = state.widgetsLegacy[node.value.widget]
         if (widget !== undefined) {
+          console.log('add params', [state, widget, node.value, node.position, parseInt(key)])
           state = AppState.addNodeLegacy(state, widget, node.value, node.position, parseInt(key))
         } else {
           console.warn(`Unknown widget ${node.value.widget}`)
@@ -179,34 +183,46 @@ export const useAppStore = create<AppState>((set, get) => ({
   onLoadWorkflow: (_workflow) => {
     if ((_workflow as any)['data']) return get().onLoadWorkflowLegacy(_workflow as PersistedGraphLegacy)
     const workflow = _workflow as WorkflowSchema
-    set((st) => {
-      let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graphLegacy: {} }
-      const nodes = workflow.nodes
-      nodes.map((node, index) => {
-        const widget = state.widgets[node.type]
-        const values = node.widgets_values
-        if (widget !== undefined) {
-          // state = AppState.addNodeNew(state, widget, node.value, { x: node.pos[0], y: node.pos[1] }, index)
-        } else {
-          console.warn(`Unknown widget ${node.type}`)
+    console.info('Load workflow', { workflow })
+    // data
+    const data = Object.fromEntries(
+      workflow.nodes.flatMap((node) => {
+        const type = sanitizeNodeName(node.type)
+        const widget = get().widgets[type]
+        if (widget === undefined) {
+          console.error(`Unknown widget: ${type}`)
+          return []
         }
+        const values = node.widgets_values
+        const defaultFieldEntries = WidgetLegacy.getDefaultFieldsEntries(widget)
+        const fields = Object.fromEntries(
+          defaultFieldEntries.map(([key, defaultValue], i, a) => {
+            // seed widget brings value control options
+            // https://github.com/comfyanonymous/ComfyUI/blob/58c9838274f53c6aa8912992db9f73e9a0721227/web/scripts/widgets.js#L303
+            if (key === 'seed') {
+              a.splice(i + 1, 0, ['control_after_generate', 'randomize']) // "fixed", "increment", "decrement", "randomize"
+            }
+            return [key, values?.[i] ?? defaultValue]
+          })
+        )
+        console.log({ type, values, fields, defaultFieldEntries })
+        return [[node.id, { position: { x: node.pos[0], y: node.pos[1] }, value: { widget: type, fields } }]]
       })
-      // for (const [key, node] of Object.entries(nodes)) {
-      //   const widget = state.widgets[node.value.widget]
-      //   if (widget !== undefined) {
-      //     state = AppState.addNodeNew(state, widget, node.value, node.position, parseInt(key))
-      //   } else {
-      //     console.warn(`Unknown widget ${node.value.widget}`)
-      //   }
-      // }
-      // for (const connection of workflow.connections) {
-      //   state = AppState.addConnection(state, connection)
-      // }
-
-      // return state
-      alert('TODO: load workflow new')
-      return st
-    }, true)
+    )
+    console.info({ data })
+    // connections
+    const nodeMap = new Map(workflow.nodes.map((node) => [node.id, node]))
+    const connections = workflow.links.map((link) => {
+      const [id, src, src_slot, dst, dst_slot] = link as number[]
+      return {
+        source: src.toString(),
+        target: dst.toString(),
+        sourceHandle: nodeMap.get(src)!.outputs![src_slot].name,
+        targetHandle: nodeMap.get(dst)!.inputs![dst_slot].name,
+      }
+    })
+    console.info({ connections })
+    return get().onLoadWorkflowLegacy({ data, connections })
   },
 
   onSaveWorkflowLegacy: () => {
@@ -227,9 +243,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   onImageSave: (id, images) => {
     set((st) => ({
       gallery: st.gallery.concat(images.map((image) => ({ image }))),
-      graphLegacy: {
-        ...st.graphLegacy,
-        [id]: { ...st.graphLegacy[id], images },
+      graph: {
+        ...st.graph,
+        [id]: { ...st.graph[id], images },
       },
     }))
   },
@@ -249,8 +265,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ previewedImageIndex: undefined })
   },
   onLoadImageWorkflow: (image) => {
-    void exifr.parse(getBackendUrl(`/view?${new URLSearchParams(image)}`)).then((res) => {
-      get().onLoadWorkflowLegacy(JSON.parse(res.workflow))
+    console.info('Load Image workflow', { image })
+    const parseInput = image instanceof ArrayBuffer ? image : getBackendUrl(`/view?${new URLSearchParams(image)}`)
+    void exifr.parse(parseInput).then((res) => {
+      // exif will store PersistedGraphLegacy
+      const imageWorkflow = JSON.parse(res.workflow) as PersistedGraphLegacy
+      get().onLoadWorkflow(imageWorkflow)
     })
   },
 }))
@@ -286,7 +306,7 @@ export const AppState = {
     return {
       ...state,
       nodes: applyNodeChanges([{ type: 'add', item }], state.nodes),
-      graphLegacy: { ...state.graphLegacy, [id]: node ?? SDNodeLegacy.fromWidget(widget) },
+      graph: { ...state.graph, [id]: node ?? SDNodeLegacy.fromWidgetLegacy(widget) },
       counter: nextKey,
     }
   },
@@ -308,7 +328,7 @@ export const AppState = {
     return {
       ...state,
       nodes: applyNodeChanges([{ type: 'add', item }], state.nodes),
-      graph: { ...state.graph, [id]: node ?? SDNode.fromWidget(widget) },
+      graphNew: { ...state.graphNew, [id]: node ?? SDNode.fromWidget(widget) },
       counter: nextKey,
     }
   },
@@ -318,12 +338,11 @@ export const AppState = {
   toPersistedLegacy(state: AppState): PersistedGraphLegacy {
     const data: Record<NodeId, PersistedNodeLegacy> = {}
     for (const node of state.nodes) {
-      const value = state.graphLegacy[node.id]
+      const value = state.graph[node.id]
       if (value !== undefined) {
         data[node.id] = { value, position: node.position }
       }
     }
-
     return {
       data,
       connections: AppState.getValidConnections(state),
@@ -332,7 +351,7 @@ export const AppState = {
   toPersisted(state: AppState): WorkflowSchema {
     const nodes: Record<NodeId, PersistedNode> = {}
     for (const node of state.nodes) {
-      const value = state.graph[node.id]
+      const value = state.graphNew[node.id]
       if (value !== undefined) {
         nodes[node.id] = { value, position: node.position }
       }
@@ -367,4 +386,8 @@ async function getQueueItems(clientId?: string): Promise<QueueItem[]> {
       return { id, prompts, model }
     })
   return queue
+}
+
+function sanitizeNodeName(string: any) {
+  return String(string).replace(/[&<>"'`=]/g, '')
 }

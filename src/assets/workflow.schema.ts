@@ -1,7 +1,9 @@
 // import { WorkflowData } from "../workflowSchema";
-import WF20240523 from './workflow-2024-05-23.json'
-import WFDefault from './defaultWorkflow.json'
+// import WF20240523 from './workflow-2024-05-23.json'
+// import WFDefault from './defaultWorkflow'
+import { defaultWorkflow } from './defaultWorkflow'
 import WFLegacy from './defaultWorkflowLegacy.json'
+import { WF20240524 } from './workflow-2024-05-24'
 // export type WorkflowNode = {
 //   // TODO
 // }
@@ -17,5 +19,6 @@ import WFLegacy from './defaultWorkflowLegacy.json'
 //   }
 //   version?: number
 // }
-export type WorkflowSchema = typeof WF20240523 & typeof WFDefault
-export { WF20240523, WFDefault, WFLegacy }
+export type WorkflowSchema = typeof WF20240524 
+const WFDefault = defaultWorkflow
+export { WF20240524, WFDefault, WFLegacy }

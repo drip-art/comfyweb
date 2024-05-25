@@ -24,16 +24,12 @@ declare global {
 //   }
 // })
 
-const config: Config =
-  (await (async () => localStorage.getItem('comfyweb-config'))()
-    .then((e) => JSON.parse(String(e)))
-    .catch(() => null)) ?? defaultConfig
+// load config by async
+const config: Config = JSON.parse(localStorage.getItem('comfyweb-config') ?? 'null') ?? defaultConfig
 globalThis.comfywebConfig = config
-console.log(config)
 
 export function getBackendUrl(endpoint: string): string {
   const config = globalThis.comfywebConfig
   return `${config.baseUrl}${endpoint}`
 }
-
 export default config

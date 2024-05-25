@@ -1,4 +1,4 @@
-import ReactFlow, { Background, BackgroundVariant, Controls, Panel } from 'reactflow'
+import ReactFlow, { Background, BackgroundVariant, Controls, MiniMap, Panel } from 'reactflow'
 import { shallow } from 'zustand/shallow'
 
 import { useAppStore } from '../store'
@@ -19,11 +19,6 @@ export default function App() {
     <div style={{ width: '100vw', height: '100vh' }}>
       <FlowContainer />
       <WsController />
-      <div className="right-0 top-0 absolute overflow-visible">
-        <div className="p-4">
-          <SettingsPanelButton />
-        </div>
-      </div>
     </div>
   )
 }
@@ -61,7 +56,13 @@ function FlowContainer() {
       <Panel position="bottom-center">
         <ControlPanelContainer />
         <ImageViewContainer />
+        <div className="right-0 top-0 absolute overflow-visible">
+          <div className="p-3">
+            <SettingsPanelButton />
+          </div>
+        </div>
       </Panel>
+      <MiniMap nodeStrokeWidth={3} position="top-right" />
     </ReactFlow>
   )
 }

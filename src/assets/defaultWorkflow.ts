@@ -1,4 +1,4 @@
-{
+export const defaultWorkflow = {
     "last_node_id": 11,
     "last_link_id": 12,
     "nodes": [

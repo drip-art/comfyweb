@@ -15,7 +15,7 @@ export function NodeContainer(props: NodeProps<WidgetLegacy>): JSX.Element {
   const { progressBar, imagePreviews, onPreviewImage, onDuplicateNode, onDeleteNode } = useAppStore(
     (st) => ({
       progressBar: st.nodeInProgress?.id === props.id ? st.nodeInProgress.progress : undefined,
-      imagePreviews: st.graphLegacy[props.id]?.images?.flatMap((image) => {
+      imagePreviews: st.graph[props.id]?.images?.flatMap((image) => {
         const index = st.gallery.findIndex((i) => i.image === image)
         return index !== -1 ? { image, index } : []
       }),
@@ -49,11 +49,20 @@ export function ControlPanelContainer(): JSX.Element {
   return <ControlPanelComponent promptError={promptError} onSubmit={onSubmit} />
 }
 export function WorkflowPageContainer(): JSX.Element {
-  const { onLoadWorkflow, onSaveWorkflow } = useAppStore((st) => ({
+  const { onLoadWorkflow, onSaveWorkflow, onLoadImageWorkflow } = useAppStore((st) => ({
     onLoadWorkflow: st.onLoadWorkflow,
     onSaveWorkflow: st.onSaveWorkflowLegacy,
+    onLoadImageWorkflow: st.onLoadImageWorkflow,
   }))
-  return <WorkflowPageComponent onLoadWorkflow={onLoadWorkflow} onSaveWorkflow={onSaveWorkflow} />
+  return (
+    <WorkflowPageComponent
+      {...{
+        onLoadWorkflow,
+        onSaveWorkflow,
+        onLoadImageWorkflow,
+      }}
+    />
+  )
 }
 
 export function QueueContainer(): JSX.Element {
@@ -110,12 +119,12 @@ interface InputContainerProps {
 }
 
 export function InputContainer({ id, name, input }: InputContainerProps): JSX.Element {
-  const { value, onPropChange } = useAppStore(
-    (st) => ({
-      value: st.graphLegacy[id]?.fields[name],
+  const { value, onPropChange } = useAppStore((st) => {
+    console.log('render input', id, name, st.graph[id])
+    return {
+      value: st.graph[id]?.fields[name],
       onPropChange: st.onPropChange,
-    }),
-    shallow
-  )
+    }
+  }, shallow)
   return <InputComponent value={value} name={name} input={input} onChange={(val) => onPropChange(id, name, val)} />
 }

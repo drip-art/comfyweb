@@ -15,7 +15,9 @@ export default function BackendSwitcher() {
           baseUrl: (document.querySelector('input#backend_url') as HTMLInputElement)!.value,
         })
         setComfywebConfig(newConfig)
-        alert('New Backend URL:' + getBackendUrl(''))
+        alert('Reload with backend URL:' + getBackendUrl(''))
+        location.reload()
+
       }}
     >
       <div className="flex gap-3">

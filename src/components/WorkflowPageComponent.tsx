@@ -12,44 +12,35 @@ interface Props {
 
 function WorkflowPageComponent({ onLoadWorkflow, onSaveWorkflow, onLoadImageWorkflow }: Props): JSX.Element {
   return (
-    <div className="px-2 py-4">
-      <label className="p-2 cursor-pointer bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load workflow
+    <div className="px-2 py-4 flex flex-wrap gap-4">
+      <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
+        Load
         <input type="file" className="hidden" onChange={(ev) => readWorkflowFromFile(ev, onLoadWorkflow)}></input>
       </label>
-      <label className="p-2 cursor-pointer bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load Image workflow
+      <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
+        Load Image
         <input
           type="file"
           className="hidden"
           onChange={(ev) => readImageWorkflowFromFile(ev, onLoadImageWorkflow)}
         ></input>
       </label>
-
-      <div className="p-2 my-4 cursor-pointer bg-stone-800 hover:bg-stone-700 rounded-md" onClick={onSaveWorkflow}>
-        Save workflow
-      </div>
-      <label className="p-2 cursor-pointer bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load default workflow (Legacy)
+      <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md" onClick={onSaveWorkflow}>
+        Save
+      </label>
+      <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
+        Load default (Legacy)
         <button
           onClick={() => {
             onLoadWorkflow(WFLegacy)
           }}
         />
       </label>
-      <label className="p-2 cursor-pointer bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load default workflow
+      <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
+        Load default
         <button
           onClick={() => {
             onLoadWorkflow(WF20240524)
-          }}
-        />
-      </label>
-      <label className="p-2 cursor-pointer bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load default workflow
-        <button
-          onClick={() => {
-            WF20240524
           }}
         />
       </label>

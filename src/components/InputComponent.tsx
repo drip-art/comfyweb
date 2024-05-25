@@ -37,6 +37,7 @@ function InputComponent({ value, name, input, onChange }: InputProps): JSX.Eleme
     )
   }
   if (Input.isInt(input)) {
+    console.log({input, name, value})
     return (
       <Labelled name={name}>
         <IntInput value={value} onChange={onChange} />
