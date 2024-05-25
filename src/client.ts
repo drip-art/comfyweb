@@ -75,6 +75,7 @@ export function createPrompt(
     const fields = { ...node.value.fields }
     for (const [property, value] of Object.entries(fields)) {
       const input = widgets[node.value.widget].input.required[property]
+      console.log(widgets[node.value.widget], property, input)
       if (Input.isInt(input) && input[1].randomizable === true && value === -1) {
         fields[property] = Math.trunc(Math.random() * Number.MAX_SAFE_INTEGER)
       }

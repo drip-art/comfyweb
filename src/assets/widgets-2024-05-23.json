@@ -8076,7 +8076,8 @@
         "input": {
             "required": {
                 "image": [
-                    "WEBCAM"
+                    "WEBCAM",
+                    {}
                 ],
                 "width": [
                     "INT",

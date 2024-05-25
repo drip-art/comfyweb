@@ -116,8 +116,8 @@ export interface InputType {
   STRING: [string, StringProps]
 }
 
-const FLOWS = ['MODEL', 'CONDITIONING', 'CLIP', 'IMAGE', 'LATENT', 'CONTROL_NET', 'MASK', 'WEBCAM'] as const
-export type Flow = (typeof FLOWS)[number]
+const FlowTypes = ['MODEL', 'CONDITIONING', 'CLIP', 'IMAGE', 'LATENT', 'CONTROL_NET', 'MASK', 'WEBCAM', '*'] as const
+export type Flow = (typeof FlowTypes)[number]
 
 export type Parameter<K extends keyof InputType> = [K, InputType[K][1]]
 
@@ -182,6 +182,13 @@ export const Message = {
   },
 }
 
+// reactflow connection is nullable
+export interface ReactFlowConnection {
+  source: string|null
+  sourceHandle: string|null
+  target: string|null
+  targetHandle: string|null
+}
 export interface Connection {
   source: string
   sourceHandle: string

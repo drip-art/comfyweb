@@ -1,15 +1,12 @@
-import ReactFlow, { Background, BackgroundVariant, Controls, MiniMap, Panel } from 'reactflow'
-import { shallow } from 'zustand/shallow'
-
-import { useAppStore } from '../store'
-import { NODE_IDENTIFIER } from './NodeComponent'
-
-import { useEffect } from 'react'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
+import ReactFlow, { Background, BackgroundVariant, Controls, MiniMap, Panel } from 'reactflow'
 import 'reactflow/dist/style.css'
+import { shallow } from 'zustand/shallow'
 import { getBackendUrl } from '../config'
 import { ControlPanelContainer, ImageViewContainer, NodeContainer } from '../containers'
+import { useAppStore } from '../store'
 import { Message } from '../types'
+import { NODE_IDENTIFIER } from './NodeComponent'
 import SettingsPanelButton from './SettingsPanelButton'
 
 const nodeTypes = { [NODE_IDENTIFIER]: NodeContainer }
@@ -24,7 +21,7 @@ export default function App() {
 }
 
 function FlowContainer() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onInit } = useAppStore(
+  const { isValidConnection, nodes, edges, onNodesChange, onEdgesChange, onConnect, onInit } = useAppStore(
     (st) => ({
       nodes: st.nodes,
       edges: st.edges,
@@ -32,6 +29,8 @@ function FlowContainer() {
       onEdgesChange: st.onEdgesChange,
       onConnect: st.onConnect,
       onInit: st.onInit,
+      isValidConnection: st.isValidConnection,
+      
     }),
     shallow
   )
@@ -47,6 +46,7 @@ function FlowContainer() {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
+      isValidConnection={isValidConnection}
       onInit={(reactFlowInstance) => {
         onInit()
       }}

@@ -26,6 +26,7 @@ import {
 } from './persistence'
 import {
   ComfyImage,
+  ReactFlowConnection,
   SDNode,
   SDNodeLegacy,
   Widget,
@@ -38,6 +39,7 @@ import {
   type QueueItem,
   type WidgetKey,
 } from './types'
+import { map, mapObjIndexed } from 'rambda'
 
 export type OnPropChange = (node: NodeId, property: PropertyKey, value: any) => void
 
@@ -57,6 +59,7 @@ export interface AppState {
   queue: QueueItem[]
   gallery: GalleryItem[]
   previewedImageIndex?: number
+  isValidConnection: (connection: ReactFlowConnection) => boolean
   onNodesChange: OnNodesChange
   onEdgesChange: OnEdgesChange
   onConnect: OnConnect
@@ -94,6 +97,20 @@ export const useAppStore = create<AppState>((set, get) => ({
   edges: [],
   queue: [],
   gallery: [],
+  isValidConnection: (connection) => {
+    const { source, sourceHandle, target, targetHandle } = connection
+    if (!target) return false
+    if (!source) return false
+    if (!sourceHandle) return false
+    if (!targetHandle) return false
+
+    const st = get()
+    const sourceType = st.widgets[st.graph[target].widget].output.find((out) => out === sourceHandle)
+    const targetType = new Map(Object.entries(st.widgets[st.graph[target].widget].input.required)).get(
+      targetHandle
+    )?.[0]
+    return sourceType === targetType
+  },
   onNodesChange: (changes) => {
     set((st) => ({ nodes: applyNodeChanges(changes, st.nodes) }))
   },
@@ -154,8 +171,34 @@ export const useAppStore = create<AppState>((set, get) => ({
   onInit: async () => {
     setInterval(() => get().onPersistLocal(), 5000)
 
-    const widgets = await getWidgets()
-    console.log({ widgets })
+    const rawWidgets = await getWidgets()
+
+    // add a control_after_generate field after seeds
+    const widgets = Object.fromEntries(
+      Object.entries(rawWidgets).map(([id, widget]) => {
+        const newWidget = {
+          ...widget,
+          input: {
+            ...widget.input,
+            required: Object.fromEntries(
+              Object.entries(widget.input.required).flatMap(([field, info], i, a) => {
+                const isSeed = ['INT:seed', 'INT:noise_seed'].includes(`${info[0]}:${field}`)
+                if (isSeed) {
+                  return [
+                    [field, info],
+                    ['control_after_generate', [['fixed', 'increment', 'decrement', 'randomize']]],
+                  ]
+                }
+                return [[field, info]]
+              })
+            ),
+          },
+        }
+        if (id === 'KSampler') console.log(newWidget)
+        return [id, newWidget]
+      })
+    ) as typeof rawWidgets
+    console.log('widgets loaded', { widgets, rawWidgets })
     set({ widgetsLegacy: widgets })
     set({ widgets: widgets })
 
@@ -196,15 +239,9 @@ export const useAppStore = create<AppState>((set, get) => ({
         const values = node.widgets_values
         const defaultFieldEntries = WidgetLegacy.getDefaultFieldsEntries(widget)
         const fields = Object.fromEntries(
-          defaultFieldEntries.map(([key, defaultValue], i, a) => {
-            // seed widget brings value control options
-            // https://github.com/comfyanonymous/ComfyUI/blob/58c9838274f53c6aa8912992db9f73e9a0721227/web/scripts/widgets.js#L303
-            if (key === 'seed') {
-              a.splice(i + 1, 0, ['control_after_generate', 'randomize']) // "fixed", "increment", "decrement", "randomize"
-            }
-            return [key, values?.[i] ?? defaultValue]
-          })
+          defaultFieldEntries.map(([key, defaultValue], i, a) => [key, values?.[i] ?? defaultValue])
         )
+        if (type === 'KSampler') console.error(fields, defaultFieldEntries, values)
         console.log({ type, values, fields, defaultFieldEntries })
         return [[node.id, { position: { x: node.pos[0], y: node.pos[1] }, value: { widget: type, fields } }]]
       })
@@ -219,7 +256,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         target: dst.toString(),
         sourceHandle: nodeMap.get(src)!.outputs![src_slot].name,
         targetHandle: nodeMap.get(dst)!.inputs![dst_slot].name,
-      }
+      } satisfies Connection
     })
     console.info({ connections })
     return get().onLoadWorkflowLegacy({ data, connections })
