@@ -55,11 +55,6 @@ function FlowContainer() {
       <Panel position="bottom-center">
         <ControlPanelContainer />
         <ImageViewContainer />
-        <div className="right-0 top-0 absolute overflow-visible">
-          <div className="p-3">
-            <SettingsPanel />
-          </div>
-        </div>
       </Panel>
       <MiniMap nodeStrokeWidth={3} position="top-right" />
     </ReactFlow>
