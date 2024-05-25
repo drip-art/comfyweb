@@ -184,10 +184,10 @@ export const Message = {
 
 // reactflow connection is nullable
 export interface ReactFlowConnection {
-  source: string|null
-  sourceHandle: string|null
-  target: string|null
-  targetHandle: string|null
+  source: string | null
+  sourceHandle: string | null
+  target: string | null
+  targetHandle: string | null
 }
 export interface Connection {
   source: string

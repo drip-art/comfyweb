@@ -30,7 +30,6 @@ function FlowContainer() {
       onConnect: st.onConnect,
       onInit: st.onInit,
       isValidConnection: st.isValidConnection,
-      
     }),
     shallow
   )
