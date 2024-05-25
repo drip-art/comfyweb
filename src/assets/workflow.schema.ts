@@ -19,6 +19,6 @@ import { WF20240524 } from './workflow-2024-05-24'
 //   }
 //   version?: number
 // }
-export type WorkflowSchema = typeof WF20240524 
+export type WorkflowSchema = typeof WF20240524
 const WFDefault = defaultWorkflow
 export { WF20240524, WFDefault, WFLegacy }

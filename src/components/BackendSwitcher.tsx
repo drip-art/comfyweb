@@ -17,7 +17,6 @@ export default function BackendSwitcher() {
         setComfywebConfig(newConfig)
         alert('Reload with backend URL:' + getBackendUrl(''))
         location.reload()
-
       }}
     >
       <div className="flex gap-3">
