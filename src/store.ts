@@ -187,25 +187,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     // add a control_after_generate field after seeds
     const widgets = Object.fromEntries(
       Object.entries(rawWidgets).map(([id, widget]) => {
-        const newWidget = {
-          ...widget,
-          input: {
-            ...widget.input,
-            required: Object.fromEntries(
-              Object.entries(widget.input.required).flatMap(([field, info], i, a) => {
-                const isSeed = ['INT:seed', 'INT:noise_seed'].includes(`${info[0]}:${field}`)
-                if (isSeed) {
-                  return [
-                    [field, info],
-                    ['control_after_generate', [['fixed', 'increment', 'decrement', 'randomize']]],
-                  ]
-                }
-                return [[field, info]]
-              })
-            ),
-          },
-        }
-        if (id === 'KSampler') console.log(newWidget)
+        const newWidget = WidgetLegacy.withControlAfterGenerate(widget)
         return [id, newWidget]
       })
     ) as typeof rawWidgets
