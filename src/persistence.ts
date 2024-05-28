@@ -25,9 +25,7 @@ const GRAPH_KEY = 'graph'
 
 export function retrieveLocalWorkflow(): WorkflowSchema | PersistedGraphLegacy | null {
   const item = localStorage.getItem(GRAPH_KEY)
-  return null
-  // return WF20240524
-  // return item === null ? WF20240524 : JSON.parse(item)
+  return item === null ? WF20240524 : JSON.parse(item)
 }
 
 export function saveLocalWorkflow(graph: PersistedGraphLegacy): void {
