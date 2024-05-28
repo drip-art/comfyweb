@@ -1,7 +1,5 @@
 import { SDNode, type Connection, type NodeId, type SDNodeLegacy } from './types'
-// import defaultWorkflowLegacy from './assets/defaultWorkflowLegacy.json'
 import { WF20240524, WorkflowSchema } from './assets/workflow.schema'
-import { defaultWorkflow } from './assets/defaultWorkflow'
 
 export interface PersistedNodeLegacy {
   value: SDNodeLegacy
@@ -22,7 +20,9 @@ export interface PersistedGraphLegacy {
 }
 
 const GRAPH_KEY = 'graph'
-
+export function clearWorkflow(): void {
+  localStorage.removeItem(GRAPH_KEY)
+}
 export function retrieveLocalWorkflow(): WorkflowSchema | PersistedGraphLegacy | null {
   const item = localStorage.getItem(GRAPH_KEY)
   return item === null ? WF20240524 : JSON.parse(item)

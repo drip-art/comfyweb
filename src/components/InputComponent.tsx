@@ -11,6 +11,8 @@ interface InputProps {
 }
 
 function InputComponent({ value, name, input, onChange }: InputProps): JSX.Element {
+  console.log('InputComponent', { input, name, value })
+
   if (Input.isList(input)) {
     return (
       <Labelled name={name}>

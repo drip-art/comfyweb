@@ -7,10 +7,11 @@ import { ComfyImage } from '../types'
 interface Props {
   onLoadWorkflow: (persisted: PersistedGraphLegacy | WorkflowSchema) => void
   onSaveWorkflow: () => void
+  onClearWorkflow: () => void
   onLoadImageWorkflow: (image: ComfyImage | ArrayBuffer) => void
 }
 
-function WorkflowPageComponent({ onLoadWorkflow, onSaveWorkflow, onLoadImageWorkflow }: Props): JSX.Element {
+function WorkflowPageComponent({ onClearWorkflow, onLoadWorkflow, onSaveWorkflow, onLoadImageWorkflow }: Props): JSX.Element {
   return (
     <div className="px-2 py-4 flex flex-wrap gap-4">
       <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
@@ -44,8 +45,17 @@ function WorkflowPageComponent({ onLoadWorkflow, onSaveWorkflow, onLoadImageWork
           }}
         />
       </label>
+      <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
+        Clear
+        <button
+          onClick={() => {
+            onClearWorkflow()
+          }}
+        />
+      </label>
     </div>
   )
 }
 
-export default memo(WorkflowPageComponent)
+export default WorkflowPageComponent
+// export default memo(WorkflowPageComponent)
