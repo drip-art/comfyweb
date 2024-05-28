@@ -11,6 +11,7 @@ import WorkflowPageComponent from './components/WorkflowPageComponent'
 import { useAppStore } from './store'
 import { type Input, type NodeId, type WidgetLegacy } from './types'
 import BackendSwitcher from './components/BackendSwitcher'
+import { memo } from 'react'
 
 export function NodeContainer(props: NodeProps<WidgetLegacy>): JSX.Element {
   const { progressBar, imagePreviews, onPreviewImage, onDuplicateNode, onDeleteNode } = useAppStore(
@@ -50,14 +51,16 @@ export function ControlPanelContainer(): JSX.Element {
   return <ControlPanelComponent promptError={promptError} onSubmit={onSubmit} />
 }
 export function WorkflowPageContainer(): JSX.Element {
-  const { onLoadWorkflow, onSaveWorkflow, onLoadImageWorkflow } = useAppStore((st) => ({
+  const { onLoadWorkflow, onSaveWorkflow, onLoadImageWorkflow, onClearWorkflow } = useAppStore((st) => ({
     onLoadWorkflow: st.onLoadWorkflow,
+    onClearWorkflow: st.onClearWorkflow,
     onSaveWorkflow: st.onSaveWorkflowLegacy,
     onLoadImageWorkflow: st.onLoadImageWorkflow,
   }))
   return (
     <WorkflowPageComponent
       {...{
+        onClearWorkflow,
         onLoadWorkflow,
         onSaveWorkflow,
         onLoadImageWorkflow,
@@ -126,13 +129,19 @@ interface InputContainerProps {
   input: Input
 }
 
-export function InputContainer({ id, name, input }: InputContainerProps): JSX.Element {
-  const { value, onPropChange } = useAppStore((st) => {
-    console.log('render input', id, name, st.graph[id])
-    return {
+export const InputContainer = memo(({ id, name, input }: InputContainerProps): JSX.Element => {
+  const { value, node, onPropChange } = useAppStore(
+    (st) => ({
+      node: st.graph[id],
       value: st.graph[id]?.fields[name],
       onPropChange: st.onPropChange,
-    }
-  }, shallow)
+    }),
+    shallow
+  )
+  if (!node) return <></> // node was deleted
+  if (value === undefined) {
+    console.warn('Input missing value', { id, name, input, value })
+    return <></>
+  }
   return <InputComponent value={value} name={name} input={input} onChange={(val) => onPropChange(id, name, val)} />
-}
+})

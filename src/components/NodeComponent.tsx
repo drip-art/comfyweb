@@ -39,7 +39,8 @@ function NodeComponent({
       inputs.push(property)
     }
   }
-
+  console.log('render node comp', node, params, inputs)
+  
   const isInProgress = progressBar !== undefined
   const defaultClasses = [
     'drop-shadow-md',

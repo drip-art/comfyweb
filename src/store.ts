@@ -18,6 +18,7 @@ import { NODE_IDENTIFIER } from './components/NodeComponent'
 import { getBackendUrl } from './config'
 import {
   PersistedNode,
+  clearWorkflow,
   retrieveLocalWorkflow,
   saveLocalWorkflow,
   writeJsonToFile,
@@ -86,6 +87,7 @@ export interface AppState {
   onPreviewImageNavigate: (next: boolean) => void
   onHideImagePreview: () => void
   onLoadImageWorkflow: (image: ComfyImage | ArrayBuffer) => void
+  onClearWorkflow: () => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -99,6 +101,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   edges: [],
   queue: [],
   gallery: [],
+  onClearWorkflow: () => {
+    set((st) => {
+      let state: AppState = { ...st, nodes: [], edges: [], counter: 0, graph: {}, graphNew: {} }
+      clearWorkflow()
+      return state
+    })
+  },
   isValidConnection: (connection) => {
     const { source, sourceHandle, target, targetHandle } = connection
     if (!target) return false
