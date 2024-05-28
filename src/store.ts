@@ -190,7 +190,8 @@ export const useAppStore = create<AppState>((set, get) => ({
                 decrement: (v = 0) => Math.max(spec.min!, v - 1),
                 randomize: (_ = 0) => Math.floor(Math.random() * (spec.max! - spec.min!) + spec.min!),
               }
-              return [key, control[nextField[1] as (typeof controlTypes)[0]]]
+              const newValue = control[nextField[1] as (typeof controlTypes)[0]](value)
+              return [key, newValue]
             })
           ),
         }),
