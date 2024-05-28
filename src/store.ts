@@ -24,8 +24,11 @@ import {
   type PersistedGraphLegacy,
   type PersistedNodeLegacy,
 } from './persistence'
+
 import {
   ComfyImage,
+  InputType,
+  NumberProps,
   ReactFlowConnection,
   SDNode,
   SDNodeLegacy,
@@ -39,7 +42,7 @@ import {
   type QueueItem,
   type WidgetKey,
 } from './types'
-import { map, mapObjIndexed } from 'rambda'
+import { fromPairs, map, mapObjIndexed, range, toPairs, values } from 'rambda'
 
 export type OnPropChange = (node: NodeId, property: PropertyKey, value: any) => void
 
@@ -164,7 +167,36 @@ export const useAppStore = create<AppState>((set, get) => ({
     const state = get()
     const graph = AppState.toPersistedLegacy(state)
     const res = await sendPrompt(createPrompt(graph, state.widgetsLegacy, state.clientId))
-    set({ promptError: res.error })
+    set({
+      promptError: res.error,
+      graph: map(
+        (node) => ({
+          ...node,
+          fields: fromPairs(
+            toPairs(node.fields).map(([key, value], i, a) => {
+              const spec = values(state.widgets[node.widget].input.required).find(
+                (input) => input[0] === 'INT'
+              )?.[1] as null | NumberProps<number>
+              if (!spec) return [key, value]
+              if (undefined === spec.max) return [key, value]
+              if (undefined === spec.min) return [key, value]
+              const nextField = a[i + 1]
+              const isControlled = nextField?.[0] === 'control_after_generate'
+              if (!isControlled) return [key, value]
+              const controlTypes = ['fixed', 'increment', 'decrement', 'randomize'] as const
+              const control: Record<(typeof controlTypes)[number], (n: number) => number> = {
+                fixed: (v = 0) => v,
+                increment: (v = 0) => Math.min(spec.max!, v + 1),
+                decrement: (v = 0) => Math.max(spec.min!, v - 1),
+                randomize: (_ = 0) => Math.floor(Math.random() * (spec.max! - spec.min!) + spec.min!),
+              }
+              return [key, control[nextField[1] as (typeof controlTypes)[0]]]
+            })
+          ),
+        }),
+        state.graph
+      ),
+    })
   },
   onDeleteFromQueue: async (id) => {
     await deleteFromQueue(id)
