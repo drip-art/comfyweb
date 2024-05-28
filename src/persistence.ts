@@ -1,7 +1,5 @@
 import { SDNode, type Connection, type NodeId, type SDNodeLegacy } from './types'
-// import defaultWorkflowLegacy from './assets/defaultWorkflowLegacy.json'
 import { WF20240524, WorkflowSchema } from './assets/workflow.schema'
-import { defaultWorkflow } from './assets/defaultWorkflow'
 
 export interface PersistedNodeLegacy {
   value: SDNodeLegacy
