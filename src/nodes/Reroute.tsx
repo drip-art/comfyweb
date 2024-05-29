@@ -8,7 +8,7 @@ import { NodeId, WidgetLegacy } from '../types'
 const widget = {
   name: 'Reroute',
   category: 'Group',
-  input: { required: { '': ['*'] } },
+  input: { required: { '*': ['*'] } },
   output: ['*'],
 } satisfies WidgetLegacy
 
@@ -33,7 +33,7 @@ function RerouteNode({}: {
           return true
         }}
       />
-
+{/* TODO */}
       <Handle
         type="source"
         position={Position.Right}

@@ -11,17 +11,19 @@ interface InputProps {
 }
 
 function InputComponent({ value, name, input, onChange }: InputProps): JSX.Element {
-  console.log('InputComponent', { input, name, value })
-
   if (Input.isList(input)) {
+    const values = input[0]
     return (
       <Labelled name={name}>
         <select className="text-black px-1 grow nodrag" value={value} onChange={(ev) => onChange(ev.target.value)}>
-          {input[0].map((k) => (
-            <option key={k} value={k}>
-              {k.length > MAX_SELECT_NAME ? `…${k.substring(k.length - MAX_SELECT_NAME + 1)}` : k}
-            </option>
-          ))}
+          {values.map((k) => {
+            return (
+              <option key={k} value={k}>
+                {k.length > MAX_SELECT_NAME ? `…${k.substring(k.length - MAX_SELECT_NAME + 1)}` : k}
+              </option>
+            )
+          })}
+          {!values.includes(value) && <option value={value}>{'(MISSING) ' + value}</option>}
         </select>
       </Labelled>
     )
@@ -39,7 +41,6 @@ function InputComponent({ value, name, input, onChange }: InputProps): JSX.Eleme
     )
   }
   if (Input.isInt(input)) {
-    console.log({ input, name, value })
     return (
       <Labelled name={name}>
         <IntInput value={value} onChange={onChange} />

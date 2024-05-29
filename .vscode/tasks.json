@@ -5,8 +5,9 @@
 			"type": "shell",
 			"command": "bun i && bun dev --host",
 			"problemMatcher": [],
-			"label": "npm: dev",
-			"detail": "vite","runOptions": {"runOn": "folderOpen"}
+			"label": "Develop",
+			"detail": "bun i && bun dev --host",
+			"runOptions": {"runOn": "folderOpen"}
 		}
 	]
 }

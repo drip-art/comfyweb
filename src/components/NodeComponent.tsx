@@ -1,12 +1,16 @@
+import { useAttribute } from 'use-attribute'
 import { memo } from 'react'
 import { type NodeProps, Position, type HandleType, Handle } from 'reactflow'
-import { type WidgetLegacy, Input, type NodeId, ComfyImage } from '../types'
+import { type WidgetLegacy, Input, type NodeId, ComfyImage, Flow } from '../types'
 import { TrashIcon, DocumentDuplicateIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline'
 import './NodeComponent.css'
 import { InputContainer } from '../containers'
 import { getBackendUrl } from '../config'
-
+import 'use-attribute'
+import clsx from 'clsx'
+import { cyrb53 } from './cyrb53'
 export const NODE_IDENTIFIER = 'sdNode'
+export const EDGE_IDENTIFIER = 'comfyEdge'
 
 interface ImagePreview {
   image: ComfyImage
@@ -30,17 +34,10 @@ function NodeComponent({
   onDuplicateNode,
   onDeleteNode,
 }: Props): JSX.Element {
-  const params = []
-  const inputs = []
-  for (const [property, input] of Object.entries(node.data.input.required)) {
-    if (Input.isParameterOrList(input)) {
-      params.push({ property, input })
-    } else {
-      inputs.push(property)
-    }
-  }
-  console.log('render node comp', node, params, inputs)
-  
+  const required = Object.entries(node.data.input.required)
+  const params = required.flatMap(([property, input]) => (Input.isParameterOrList(input) ? [{ property, input }] : []))
+  const inputs = required.flatMap(([property, input]) => (!Input.isParameterOrList(input) ? [{ property, input }] : []))
+
   const isInProgress = progressBar !== undefined
   const defaultClasses = [
     'drop-shadow-md',
@@ -74,8 +71,15 @@ function NodeComponent({
       </div>
       <div className="px-2 py-2 flex space-x-2 justify-between">
         <div className="flex flex-col grow-0 py-1">
-          {inputs.map((k) => (
-            <Slot key={k} id={k} label={k} type="target" position={Position.Left} />
+          {inputs.map(({ property, input }, i) => (
+            <Slot
+              key={property}
+              id={property}
+              label={property}
+              flowType={input[0]}
+              type="target"
+              position={Position.Left}
+            />
           ))}
         </div>
         <div className="flex flex-col items-start grow p-1 space-y-1 text-sm">
@@ -85,7 +89,8 @@ function NodeComponent({
         </div>
         <div className="flex flex-col py-1">
           {node.data.output.map((k) => (
-            <Slot key={k} id={k} label={k} type="source" position={Position.Right} />
+            // warning: output key may not unique
+            <Slot key={k} id={k} label={k} flowType={k} type="source" position={Position.Right} />
           ))}
         </div>
       </div>
@@ -116,12 +121,29 @@ interface SlotProps {
   label: string
   type: HandleType
   position: Position
+  flowType: Flow
 }
-
-function Slot({ id, label, type, position }: SlotProps): JSX.Element {
+function Slot({ id, label, type, position, flowType }: SlotProps): JSX.Element {
+  const deg = cyrb53(flowType) % 360
+  const styledElementRef = useAttribute<HTMLDivElement>(
+    'style',
+    [`--bg: hsl(${deg}deg 60% 80%)`, `--bg-hover: hsl(${deg}deg 80% 80%)`, `--bg-active: hsl(${deg}deg 80% 70%)`].join(
+      '; '
+    )
+  )
   return (
-    <div className={position === Position.Right ? 'flex flex-row-reverse' : 'flex'}>
-      <Handle id={id} type={type} position={position} className="w-3 h-3 !bg-teal-500 relative" />
+    <div className={position === Position.Right ? 'flex flex-row-reverse' : 'flex'} ref={styledElementRef}>
+      <Handle
+        id={id}
+        type={type}
+        position={position}
+        className={clsx(
+          'w-3 h-3 relative',
+          'bg-[var(--bg)]',
+          'hover:bg-[var(--bg-hover)]',
+          'activate:bg-[var(--bg-activate)]'
+        )}
+      />
       <h5 className="font-semibold text-xs" style={{ marginBottom: 2 }}>
         {label}
       </h5>

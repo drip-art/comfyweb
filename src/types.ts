@@ -151,7 +151,6 @@ export const Input = {
   },
 
   isInt(i: Input): i is Parameter<'INT'> {
-    console.log(i)
     return i[0] === 'INT'
   },
 
@@ -167,7 +166,7 @@ export const Input = {
     return Array.isArray(i[0])
   },
 
-  isParameterOrList(i: Input): boolean {
+  isParameterOrList(i: Input): i is Parameter<keyof InputType> | [string[]] {
     return Input.isBool(i) || Input.isInt(i) || Input.isFloat(i) || Input.isString(i) || Input.isList(i)
   },
 }
