@@ -33,6 +33,26 @@ export interface WidgetLegacy {
 export type Widget = WidgetLegacy & { display_name?: string; description?: string; output_node?: boolean }
 
 export const WidgetLegacy = {
+  withControlAfterGenerate(widget: WidgetLegacy) {
+    return {
+      ...widget,
+      input: {
+        ...widget.input,
+        required: Object.fromEntries(
+          Object.entries(widget.input.required).flatMap(([field, info], i, a) => {
+            const isSeed = ['INT:seed', 'INT:noise_seed'].includes(`${info[0]}:${field}`)
+            if (isSeed) {
+              return [
+                [field, info],
+                ['control_after_generate', [['fixed', 'increment', 'decrement', 'randomize']]],
+              ]
+            }
+            return [[field, info]]
+          })
+        ),
+      },
+    }
+  },
   getDefaultFields(widget: WidgetLegacy): Record<PropertyKey, any> {
     const fields: Record<PropertyKey, any> = {}
     for (const [key, input] of Object.entries(widget.input.required)) {
@@ -131,7 +151,6 @@ export const Input = {
   },
 
   isInt(i: Input): i is Parameter<'INT'> {
-    console.log(i)
     return i[0] === 'INT'
   },
 
@@ -147,7 +166,7 @@ export const Input = {
     return Array.isArray(i[0])
   },
 
-  isParameterOrList(i: Input): boolean {
+  isParameterOrList(i: Input): i is Parameter<keyof InputType> | [string[]] {
     return Input.isBool(i) || Input.isInt(i) || Input.isFloat(i) || Input.isString(i) || Input.isList(i)
   },
 }

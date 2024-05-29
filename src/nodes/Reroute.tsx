@@ -1,15 +1,14 @@
 'WIP'
-import { memo, useEffect, useState } from 'react'
+import { memo } from 'react'
 import { Handle, NodeProps, Position } from 'reactflow'
-import { Flow, NodeId, WidgetLegacy } from '../types'
 import { useAppStore } from '../store'
+import { NodeId, WidgetLegacy } from '../types'
 // useAppStore.setState((s) => (s.widgets.Reroute = RerouteNode))
 
 const widget = {
   name: 'Reroute',
   category: 'Group',
-  input: { required: { '': ['*'] } },
-
+  input: { required: { '*': ['*'] } },
   output: ['*'],
 } satisfies WidgetLegacy
 
@@ -34,7 +33,7 @@ function RerouteNode({}: {
           return true
         }}
       />
-
+{/* TODO */}
       <Handle
         type="source"
         position={Position.Right}

@@ -14,7 +14,7 @@ import {
 import { create } from 'zustand'
 import { WorkflowSchema } from './assets/workflow.schema'
 import { createPrompt, deleteFromQueue, getQueue, getWidgetLibrary as getWidgets, sendPrompt } from './client'
-import { NODE_IDENTIFIER } from './components/NodeComponent'
+import { EDGE_IDENTIFIER, NODE_IDENTIFIER } from './components/NodeComponent'
 import { getBackendUrl } from './config'
 import {
   PersistedNode,
@@ -113,13 +113,17 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   isValidConnection: (connection) => {
     const { source, sourceHandle, target, targetHandle } = connection
+    console.log({ target, source, sourceHandle, targetHandle })
     if (!target) return false
     if (!source) return false
     if (!sourceHandle) return false
     if (!targetHandle) return false
 
     const st = get()
-    const sourceType = st.widgets[st.graph[target].widget].output.find((out) => out === sourceHandle)
+    const targetAlreadyConnection = !!st.edges.find((edge) => edge.target === target && edge.targetHandle === targetHandle)
+    if (targetAlreadyConnection) return false
+
+    const sourceType = st.widgets[st.graph[source].widget].output.find((out) => out === sourceHandle)
     const targetType = new Map(Object.entries(st.widgets[st.graph[target].widget].input.required)).get(
       targetHandle
     )?.[0]
@@ -220,25 +224,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     // add a control_after_generate field after seeds
     const widgets = Object.fromEntries(
       Object.entries(rawWidgets).map(([id, widget]) => {
-        const newWidget = {
-          ...widget,
-          input: {
-            ...widget.input,
-            required: Object.fromEntries(
-              Object.entries(widget.input.required).flatMap(([field, info], i, a) => {
-                const isSeed = ['INT:seed', 'INT:noise_seed'].includes(`${info[0]}:${field}`)
-                if (isSeed) {
-                  return [
-                    [field, info],
-                    ['control_after_generate', [['fixed', 'increment', 'decrement', 'randomize']]],
-                  ]
-                }
-                return [[field, info]]
-              })
-            ),
-          },
-        }
-        if (id === 'KSampler') console.log(newWidget)
+        const newWidget = WidgetLegacy.withControlAfterGenerate(widget)
         return [id, newWidget]
       })
     ) as typeof rawWidgets
@@ -414,7 +400,7 @@ export const AppState = {
     }
   },
   addConnection(state: AppState, connection: FlowConnecton): AppState {
-    return { ...state, edges: addEdge(connection, state.edges) }
+    return { ...state, edges: addEdge({ ...connection, type: EDGE_IDENTIFIER }, state.edges) }
   },
   toPersistedLegacy(state: AppState): PersistedGraphLegacy {
     const data: Record<NodeId, PersistedNodeLegacy> = {}

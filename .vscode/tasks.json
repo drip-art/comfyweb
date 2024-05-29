@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"command": "bun i && bun dev --host",
+			"problemMatcher": [],
+			"label": "Develop",
+			"detail": "bun i && bun dev --host",
+			"runOptions": {"runOn": "folderOpen"}
+		}
+	]
+}

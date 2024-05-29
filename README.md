@@ -23,3 +23,7 @@ Supports almost everything that ComfyUI does (SD1, SD2, Textual Inversion, Loras
 ## demo
 
 <img height="360px" src="https://user-images.githubusercontent.com/11986158/222995594-6577155e-69bf-4b87-8d07-a4490c72c945.gif"/>
+
+## Credit
+
+https://github.com/jac3km4/comfyweb

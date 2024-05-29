@@ -6,11 +6,12 @@ import { getBackendUrl } from '../config'
 import { ControlPanelContainer, ImageViewContainer, NodeContainer } from '../containers'
 import { useAppStore } from '../store'
 import { Message } from '../types'
-import { NODE_IDENTIFIER } from './NodeComponent'
+import { EDGE_IDENTIFIER, NODE_IDENTIFIER } from './NodeComponent'
 import SettingsPanel from './SettingsPanelButton'
+import ComfyEdge from './ComfyEdge/ComfyEdge'
 
 const nodeTypes = { [NODE_IDENTIFIER]: NodeContainer }
-
+const edgeTypes = { [EDGE_IDENTIFIER]: ComfyEdge }
 export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
@@ -40,6 +41,7 @@ function FlowContainer() {
       edges={edges}
       fitView
       nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
       deleteKeyCode={['Delete']}
       disableKeyboardA11y={true}
       onNodesChange={onNodesChange}
@@ -49,14 +51,17 @@ function FlowContainer() {
       onInit={(reactFlowInstance) => {
         onInit()
       }}
+      onlyRenderVisibleElements
+      maxZoom={Infinity}
+      minZoom={0}
     >
       <Background variant={BackgroundVariant.Dots} />
       <Controls />
+      <MiniMap nodeStrokeWidth={3} position="bottom-right" />
       <Panel position="bottom-center">
         <ControlPanelContainer />
         <ImageViewContainer />
       </Panel>
-      <MiniMap nodeStrokeWidth={3} position="top-right" />
     </ReactFlow>
   )
 }

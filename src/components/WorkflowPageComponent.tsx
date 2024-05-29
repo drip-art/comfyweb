@@ -15,11 +15,11 @@ function WorkflowPageComponent({ onClearWorkflow, onLoadWorkflow, onSaveWorkflow
   return (
     <div className="px-2 py-4 flex flex-wrap gap-4">
       <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load
+        Load Workflow
         <input type="file" className="hidden" onChange={(ev) => readWorkflowFromFile(ev, onLoadWorkflow)}></input>
       </label>
       <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load Image
+        Load Workflow from Image
         <input
           type="file"
           className="hidden"
@@ -30,7 +30,7 @@ function WorkflowPageComponent({ onClearWorkflow, onLoadWorkflow, onSaveWorkflow
         Save
       </label>
       <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load default (Legacy)
+        Load default (Graph Data format)
         <button
           onClick={() => {
             onLoadWorkflow(WFLegacy)
@@ -38,7 +38,7 @@ function WorkflowPageComponent({ onClearWorkflow, onLoadWorkflow, onSaveWorkflow
         />
       </label>
       <label className="p-2 btn text-white bg-stone-800 hover:bg-stone-700 rounded-md">
-        Load default
+        Load default (Latest format)
         <button
           onClick={() => {
             onLoadWorkflow(WF20240524)
