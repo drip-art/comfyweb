@@ -51,16 +51,17 @@ function FlowContainer() {
       onInit={(reactFlowInstance) => {
         onInit()
       }}
+      onlyRenderVisibleElements
       maxZoom={Infinity}
       minZoom={0}
     >
       <Background variant={BackgroundVariant.Dots} />
       <Controls />
+      <MiniMap nodeStrokeWidth={3} position="bottom-right" />
       <Panel position="bottom-center">
         <ControlPanelContainer />
         <ImageViewContainer />
       </Panel>
-      <MiniMap nodeStrokeWidth={3} position="top-right" />
     </ReactFlow>
   )
 }
