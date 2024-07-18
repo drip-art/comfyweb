@@ -8,7 +8,7 @@ import { InputContainer } from '../containers'
 import { getBackendUrl } from '../config'
 import 'use-attribute'
 import clsx from 'clsx'
-import { cyrb53 } from './cyrb53'
+import { cyrb53 } from '../utils/cyrb53'
 export const NODE_IDENTIFIER = 'sdNode'
 export const EDGE_IDENTIFIER = 'comfyEdge'
 

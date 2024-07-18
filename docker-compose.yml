@@ -1,0 +1,11 @@
+networks:
+  snocode_default:
+    external: true
+services:
+  comfy-web:
+    image: oven/bun
+    volumes:
+      - ./:/home/bun/app
+    command: bun dev --port 80 --host
+    networks:
+      snocode_default:

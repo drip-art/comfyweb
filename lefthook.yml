@@ -20,7 +20,7 @@ pre-commit:
     #   run: eslint --fix {staged_files}
     prettier:
       glob: "*.{js,ts,jsx,tsx,md}"
-      run: prettier -w {staged_files}
+      run: bun x prettier -w {staged_files}
 #     rubocop:
 #       tags: backend style
 #       glob: "*.rb"

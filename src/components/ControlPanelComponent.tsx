@@ -30,7 +30,7 @@ function ControlPanelComponent({ onSubmit, promptError }: Props): JSX.Element {
   return (
     <>
       {promptError !== undefined ? (
-        <div className="error-popup p-1 text-sm rounded-md bg-stone-900 border-2 border-stone-400 text-red-500 -translate-y-10">
+        <div className="error-popup p-1 text-sm rounded-md bg-stone-100 dark:bg-stone-900 border-2 border-stone-400 text-red-500 -translate-y-10">
           {promptError}
         </div>
       ) : (
@@ -38,7 +38,7 @@ function ControlPanelComponent({ onSubmit, promptError }: Props): JSX.Element {
       )}
       <div
         style={{ width: '64vw' }}
-        className="drop-shadow-lg rounded-md bg-stone-900 border-2 border-stone-400 flex flex-col overflow-hidden"
+        className="drop-shadow-lg rounded-md bg-stone-100 dark:bg-stone-900 border-2 border-stone-400 flex flex-col overflow-hidden"
       >
         <PanelTabs tabs={TABS} active={activeTab} onTabChange={(tab) => setState({ minimized: false, activeTab: tab })}>
           <button

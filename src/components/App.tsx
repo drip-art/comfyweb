@@ -1,5 +1,7 @@
+import '@xyflow/react/dist/style.css'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
-import ReactFlow, { Background, BackgroundVariant, Controls, MiniMap, Panel } from 'reactflow'
+// import ReactFlow, { Background, BackgroundVariant, Controls, MiniMap, Panel } from 'reactflow'
+import { ReactFlow, Background, BackgroundVariant, Controls, MiniMap, Panel } from '@xyflow/react'
 import 'reactflow/dist/style.css'
 import { shallow } from 'zustand/shallow'
 import { getBackendUrl } from '../config'
@@ -37,17 +39,18 @@ function FlowContainer() {
 
   return (
     <ReactFlow
-      nodes={nodes}
+      // nodes={nodes ?? undefined}
       edges={edges}
       fitView
-      nodeTypes={nodeTypes}
+      // nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       deleteKeyCode={['Delete']}
       disableKeyboardA11y={true}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
+      // onNodesChange={onNodesChange}
+      // onEdgesChange={onEdgesChange}
       onConnect={onConnect}
-      isValidConnection={isValidConnection}
+      // isValidConnection={isValidConnection}
+      colorMode={'light'}
       onInit={(reactFlowInstance) => {
         onInit()
       }}

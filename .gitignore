@@ -26,3 +26,4 @@ dist-ssr
 
 .husky
 .vercel
+docker-compose.yml
